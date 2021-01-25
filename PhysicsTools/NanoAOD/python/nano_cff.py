@@ -167,7 +167,7 @@ def nanoAOD_addBoostedTauIds(process):
                                                                 #                                "2017v2", "dR0p32017v2", "newDM2017v2", #classic MVAIso tau-Ids
                                                                 #                               "deepTau2017v1", #deepTau Tau-Ids
                                                                 #                               "DPFTau_2016_v0", #D[eep]PF[low] Tau-Id
-                                                                "2017v2","boostDeepTau2017v1","againstEle2018"
+                                                                    "2017v2","boostDeepTau2017v1","againstEle2018","boostDeepTau2017v2p1"
                                                                 ])
     boostedTauIdEmbedder.runTauID()
     process.boostedTauSequence.insert(process.boostedTauSequence.index(getattr(process, "finalBoostedTaus")),

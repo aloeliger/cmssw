@@ -853,7 +853,7 @@ class BoostedTauIDEmbedder(object):
 
             )
 
-            self.processDeepProducer('deepTau2017v2p1', tauIDSources, workingPoints_)
+            self.processDeepProducer('boostDeepTau2017v2p1', tauIDSources, workingPoints_)
 
             self.process.rerunMvaIsolationBoostTask.add(self.process.boostDeepTau2017v2p1)
             self.process.rerunMvaIsolationBoostSequence += self.process.boostDeepTau2017v2p1
@@ -940,7 +940,7 @@ class BoostedTauIDEmbedder(object):
             self.process.patBoostTauDiscriminationByVLooseElectronRejectionMVA62018 = patTauDiscriminantCutMultiplexer.clone(
                 PATTauProducer = self.PATTauProducer,
 #                PATTauProducer = self.process.patTauDiscriminationByElectronRejectionMVA62018Raw.PATTauProducer,
-                Prediscriminants = self.process.patTauDiscriminationByElectronRejectionMVA62018Raw.Prediscriminants,
+                Prediscriminants = self.process.patBoostTauDiscriminationByElectronRejectionMVA62018Raw.Prediscriminants,
                 #toMultiplex = self.cms.InputTag("patTauDiscriminationByElectronRejectionMVA62018Raw"),
                 toMultiplex = self.cms.InputTag("patBoostTauDiscriminationByElectronRejectionMVA62018Raw"),
                 #key = self.cms.InputTag("patTauDiscriminationByElectronRejectionMVA62018Raw","category"),

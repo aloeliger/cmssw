@@ -47,15 +47,16 @@ finalBoostedTaus = cms.EDFilter("PATTauRefSelector",
                                 #src = cms.InputTag("slimmedTausBoosted"),
                                 #src = cms.InputTag("cleanedSlimmedTausBoosted"),
                                 #cut = cms.string("pt > 70 && tauID('decayModeFindingNewDMs') && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || tauID('byVLooseIsolationMVArun2v1DBoldDMwLT2015') || tauID('byVLooseIsolationMVArun2v1DBnewDMwLT') || tauID('byVLooseIsolationMVArun2v1DBdR03oldDMwLT') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT2017v2') || tauID('byVVLooseIsolationMVArun2v1DBnewDMwLT2017v2') || tauID('byVVLooseIsolationMVArun2v1DBdR03oldDMwLT2017v2') || tauID('byVVVLooseDeepTau2017v2p1VSjet'))")
-                                cut = cms.string("pt > 70 && tauID('decayModeFindingNewDMs') && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || tauID('byVLooseIsolationMVArun2v1DBnewDMwLT') || tauID('byVLooseIsolationMVArun2v1DBdR03oldDMwLT') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT'))")
+                                #cut = cms.string("pt > 40 && tauID('decayModeFindingNewDMs') && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || tauID('byVLooseIsolationMVArun2v1DBnewDMwLT') || tauID('byVLooseIsolationMVArun2v1DBdR03oldDMwLT') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT') || tauID('byVVVLooseBoostDeepTau2017v1VSjet'))")
+                                cut = cms.string("pt > 40 && tauID('decayModeFindingNewDMs') && (tauID('byVVVLooseBoostDeepTau2017v1VSjet'))")
 )
 
 for era in [eras.run2_nanoAOD_94XMiniAODv1,]:
     era.toModify(finalBoostedTaus,
-                 cut = cms.string("pt > 18 && tauID('decayModeFindingNewDMs') && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || tauID('byVLooseIsolationMVArun2v1DBoldDMwLT') || tauID('byVLooseIsolationMVArun2v1DBnewDMwLT') || tauID('byVLooseIsolationMVArun2v1DBdR03oldDMwLT') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT2017v1') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT2017v2') || tauID('byVVLooseIsolationMVArun2v1DBnewDMwLT2017v2') || tauID('byVVLooseIsolationMVArun2v1DBdR03oldDMwLT2017v2')|| tauID('byVVVLooseDeepTau2017v2p1VSjet'))")
+                 cut = cms.string("pt > 18 && tauID('decayModeFindingNewDMs') && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || tauID('byVLooseIsolationMVArun2v1DBoldDMwLT') || tauID('byVLooseIsolationMVArun2v1DBnewDMwLT') || tauID('byVLooseIsolationMVArun2v1DBdR03oldDMwLT') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT2017v1') || tauID('byVVLooseIsolationMVArun2v1DBoldDMwLT2017v2') || tauID('byVVLooseIsolationMVArun2v1DBnewDMwLT2017v2') || tauID('byVVLooseIsolationMVArun2v1DBdR03oldDMwLT2017v2')|| tauID('byVVVLooseBoostDeepTau2017v1VSjet'))")
     )
 eras.run2_miniAOD_80XLegacy.toModify(finalBoostedTaus,
-                                     cut =  cms.string("pt > 18 && tauID('decayModeFindingNewDMs') && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || tauID('byVLooseIsolationMVArun2v1DBoldDMwLT') || tauID('byVLooseIsolationMVArun2v1DBnewDMwLT') || tauID('byVLooseIsolationMVArun2v1DBdR03oldDMwLT'))")
+                                     cut =  cms.string("pt > 18 && tauID('decayModeFindingNewDMs') && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || tauID('byVLooseIsolationMVArun2v1DBoldDMwLT') || tauID('byVLooseIsolationMVArun2v1DBnewDMwLT') || tauID('byVLooseIsolationMVArun2v1DBdR03oldDMwLT')) || tauID('byVVVLooseBoostDeepTau2017v1VSjet')")
     )
 
 ##################### Tables for final output and docs ##########################
@@ -78,7 +79,8 @@ def _tauId8WPMask(pattern,doc):
     return _tauIdWPMask(pattern,choices=("VVVLoose","VVLoose","VLoose","Loose","Medium","Tight","VTight","VVTight"),doc=doc)
 
 boostedTauTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
-                                 src = cms.InputTag("linkedObjects","taus"),
+                                 #src = cms.InputTag("linkedObjects","taus"),
+                                 src = cms.InputTag("finalBoostedTaus"),
                                  cut = cms.string(""), #we should not filter on cross linked collections
                                  name= cms.string("boostedTau"),
                                  doc = cms.string("slimmedboostedTaus after basic selection (" + finalBoostedTaus.cut.value()+")"),
@@ -148,6 +150,7 @@ _mvaAntiEVars2018 = cms.PSet(
        rawAntiEleCat2018 = Var("tauID('againstElectronMVA6category2018')", int, doc="Anti-electron MVA discriminator V6 category (2018)"),
        idAntiEle2018 = _tauId5WPMask("againstElectron%sMVA62018", doc= "Anti-electron MVA discriminator V6 (2018)"),
 )
+"""
 _deepTauVars2017v2p1 = cms.PSet(
     rawDeepTau2017v2p1VSe = Var("tauID('byDeepTau2017v2p1VSeraw')", float, doc="byDeepTau2017v2p1VSe raw output discriminator (deepTau2017v2p1)", precision=10),
     rawDeepTau2017v2p1VSmu = Var("tauID('byDeepTau2017v2p1VSmuraw')", float, doc="byDeepTau2017v2p1VSmu raw output discriminator (deepTau2017v2p1)", precision=10),
@@ -156,14 +159,25 @@ _deepTauVars2017v2p1 = cms.PSet(
     idDeepTau2017v2p1VSmu = _tauId4WPMask("by%sDeepTau2017v2p1VSmu", doc="byDeepTau2017v2p1VSmu ID working points (deepTau2017v2p1)"),
     idDeepTau2017v2p1VSjet = _tauId8WPMask("by%sDeepTau2017v2p1VSjet", doc="byDeepTau2017v2p1VSjet ID working points (deepTau2017v2p1)"),
 )
+"""
+
+_boostedDeepVars2017v2p1 = cms.PSet(
+        rawBoostDeepTau2017v2p1VSe = Var("tauID('byBoostDeepTau2017v2p1VSeraw')", float, doc="byDeepTau2017v2p1VSe raw output discriminator (deepTau2017v2p1)", precision=10),
+    rawBoostDeepTau2017v2p1VSmu = Var("tauID('byBoostDeepTau2017v2p1VSmuraw')", float, doc="byDeepTau2017v2p1VSmu raw output discriminator (deepTau2017v2p1)", precision=10),
+    rawBoostDeepTau2017v2p1VSjet = Var("tauID('byBoostDeepTau2017v2p1VSjetraw')", float, doc="byDeepTau2017v2p1VSjet raw output discriminator (deepTau2017v2p1)", precision=10),
+    idBoostDeepTau2017v2p1VSe = _tauId8WPMask("by%sBoostDeepTau2017v2p1VSe", doc="byDeepTau2017v2p1VSe ID working points (deepTau2017v2p1)"),
+    idBoostDeepTau2017v2p1VSmu = _tauId4WPMask("by%sBoostDeepTau2017v2p1VSmu", doc="byDeepTau2017v2p1VSmu ID working points (deepTau2017v2p1)"),
+    idBoostDeepTau2017v2p1VSjet = _tauId8WPMask("by%sBoostDeepTau2017v2p1VSjet", doc="byDeepTau2017v2p1VSjet ID working points (deepTau2017v2p1)"),
+)
 
 _variablesMiniV2 = cms.PSet(
     _boostedTauVarsBase,
-    _mvaAntiEVars2018,
-    _mvaIsoVars2015Reduced,
-    _mvaIsoVars2017v1,
-    _mvaIsoVars2017v2,
-    _deepTauVars2017v2p1
+#    _mvaAntiEVars2018,
+#    _mvaIsoVars2015Reduced,
+#    _mvaIsoVars2017v1,
+#    _mvaIsoVars2017v2,
+#    _deepTauVars2017v2p1,
+    _boostedDeepVars2017v2p1,
 )
 _variablesMiniV1 = _variablesMiniV2.clone()
 _variablesMiniV1.rawMVAoldDM = Var( "tauID('byIsolationMVArun2v1DBoldDMwLTraw')",float, doc="byIsolationMVArun2v1DBoldDMwLT raw output discriminator (2015)",precision=10)
@@ -195,7 +209,7 @@ genVisBoostedTaus = cms.EDProducer("GenVisTauProducer",
 
 genVisBoostedTauTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
                                        src = cms.InputTag("genVisTaus"),
-                                       cut = cms.string("pt > 40."),
+                                       cut = cms.string("pt > 30."),
                                        name = cms.string("GenVisBoostedTau"),
                                        doc = cms.string("gen hadronic taus "),
                                        singleton = cms.bool(False), # the number of entries is variable
@@ -237,9 +251,9 @@ boostedTausMCMatchHadTauForTable = cms.EDProducer("MCMatcher",  # cut on deltaR,
 
 boostedTauMCTable = cms.EDProducer("CandMCMatchTableProducer",
                                    src = boostedTauTable.src,
-                                   mcMap = cms.InputTag("tausMCMatchLepTauForTable"),
-                                   mcMapVisTau = cms.InputTag("tausMCMatchHadTauForTable"),                         
-                                   objName = cms.string("Tau"),#boostedTauTable.name,
+                                   mcMap = cms.InputTag("boostedTausMCMatchLepTauForTable"),
+                                   mcMapVisTau = cms.InputTag("boostedTausMCMatchHadTauForTable"),                         
+                                   objName = boostedTauTable.name,
                                    objType = cms.string("Tau"),#boostedTauTable.name, #cms.string("Tau"),
                                    branchName = cms.string("genPart"),
                                    docString = cms.string("MC matching to status==2 taus"),

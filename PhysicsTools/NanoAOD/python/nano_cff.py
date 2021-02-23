@@ -4,6 +4,8 @@ from PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.NanoAOD.jets_cff import *
 from PhysicsTools.NanoAOD.muons_cff import *
 from PhysicsTools.NanoAOD.taus_cff import *
+#include new boosted tau configuration
+from PhysicsTools.NanoAOD.boostedTaus_cff import *
 from PhysicsTools.NanoAOD.electrons_cff import *
 from PhysicsTools.NanoAOD.photons_cff import *
 from PhysicsTools.NanoAOD.globals_cff import *
@@ -112,16 +114,16 @@ l1bits=cms.EDProducer("L1TriggerResultsConverter", src=cms.InputTag("gtStage2Dig
 (run2_miniAOD_80XLegacy | run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1).toModify(l1bits, storeUnprefireableBit=False)
 
 nanoSequenceCommon = cms.Sequence(
-        nanoMetadata + jetSequence + muonSequence + tauSequence + electronSequence+photonSequence+vertexSequence+
+        nanoMetadata + jetSequence + muonSequence + tauSequence + boostedTauSequence + electronSequence+photonSequence+vertexSequence+
         isoTrackSequence + jetLepSequence + # must be after all the leptons
         linkedObjects  +
-        jetTables + muonTables + tauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + isoTrackTables
+        jetTables + muonTables + tauTables + boostedTauTables + electronTables + photonTables +  globalTables +vertexTables+ metTables+simpleCleanerTable + isoTrackTables
         )
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectTables + l1bits)
 
 nanoSequence = cms.Sequence(nanoSequenceCommon + nanoSequenceOnlyFullSim)
 
-nanoSequenceFS = cms.Sequence(genParticleSequence + genVertexTables + particleLevelSequence + nanoSequenceCommon + jetMC + muonMC + electronMC + photonMC + tauMC + metMC + ttbarCatMCProducers +  globalTablesMC + btagWeightTable + genWeightsTable + genVertexTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
+nanoSequenceFS = cms.Sequence(genParticleSequence + genVertexTables + particleLevelSequence + nanoSequenceCommon + jetMC + muonMC + electronMC + photonMC + tauMC + boostedTauMC + metMC + ttbarCatMCProducers +  globalTablesMC + btagWeightTable + genWeightsTable + genVertexTable + genParticleTables + particleLevelTables + lheInfoTable  + ttbarCategoryTable )
 
 (run2_nanoAOD_92X | run2_miniAOD_80XLegacy | run2_nanoAOD_94X2016 | run2_nanoAOD_94X2016 | \
     run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94XMiniAODv2 | \
@@ -145,6 +147,36 @@ def nanoAOD_addTauIds(process):
     tauIdEmbedder.runTauID()
     process.patTauMVAIDsSeq.insert(process.patTauMVAIDsSeq.index(getattr(process, updatedTauName)),
                                    process.rerunMvaIsolationSequence)
+    return process
+
+#add boosted tau tau ID working points (needs to add most working points)
+import RecoTauTag.RecoTau.tools.runBoostedTauIdMVA as boostedTauIdConfig
+def nanoAOD_addBoostedTauIds(process):
+    updatedBoostedTauName = "slimmedTausBoostedNewID"
+    boostedTauIdEmbedder = boostedTauIdConfig.BoostedTauIDEmbedder(process, cms, debug = False,
+                                                                   updatedTauName = updatedBoostedTauName,
+                                                                   PATTauProducer = cms.InputTag('slimmedTausBoosted'),
+                                                                   #srcChargedIsoPtSum = cms.string('chargedIsoPtSumNoOverLap'),
+                                                                   srcChargedIsoPtSum = cms.string('chargedIsoPtSum'),
+                                                                   #srcNeutralIsoPtSum = cms.string('neutralIsoPtSumNoOverLap'),
+                                                                   srcNeutralIsoPtSum = cms.string('neutralIsoPtSum'),
+                                                                   toKeep = [ #choose tauIDs to be rerun
+                                                                       #                                "2017v2", "dR0p32017v2", "newDM2017v2", #classic MVAIso tau-Ids
+                                                                       #                               "deepTau2017v1", #deepTau Tau-Ids
+                                                                       #                               "DPFTau_2016_v0", #D[eep]PF[low] Tau-Id
+                                                                       #"2017v2",
+                                                                       #"boostDeepTau2017v1",
+                                                                       "againstEle2018",
+                                                                       "boostDeepTau2017v2p1"
+                                                                ])
+    boostedTauIdEmbedder.runTauID()
+    process.boostedTauSequence.insert(process.boostedTauSequence.index(getattr(process, "finalBoostedTaus")),
+                                      process.rerunMvaIsolationBoostSequence)
+
+    process.boostedTauSequence.insert(process.boostedTauSequence.index(getattr(process, "finalBoostedTaus")),
+                                      getattr(process, updatedBoostedTauName))
+
+
     return process
 
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
@@ -384,6 +416,9 @@ def nanoAOD_customizeCommon(process):
                                                                                                                                            nanoAOD_addTauIds_switch = cms.untracked.bool(False))
     if addTauIds_switch.nanoAOD_addTauIds_switch:
         process = nanoAOD_addTauIds(process)
+    #add boosted tau IDs
+    process = nanoAOD_addBoostedTauIds(process)
+    
     return process
 
 def nanoAOD_customizeData(process):

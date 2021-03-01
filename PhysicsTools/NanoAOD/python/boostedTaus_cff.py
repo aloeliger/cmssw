@@ -222,7 +222,7 @@ boostedTauMCTable = cms.EDProducer("CandMCMatchTableProducer",
 )
 
 
-boostedTauSequence = cms.Sequence(patTauMVAIDsSeq + finalBoostedTaus)
+boostedTauSequence = cms.Sequence(finalBoostedTaus)
 #_tauSequence80X =  cms.Sequence(finalTaus)
 #run2_miniAOD_80XLegacy.toReplaceWith(tauSequence,_tauSequence80X)
 boostedTauTables = cms.Sequence(boostedTauTable)

@@ -65,7 +65,6 @@ using namespace std;
 #include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
 #include <string>
 
-
 //
 // class declaration
 //
@@ -112,7 +111,6 @@ private:
   //Used for the auto-encoder/anomaly trigger emulation
   tensorflow::MetaGraphDef* metaGraph;
   tensorflow::Session* session;
-  
 };
 
 //
@@ -162,8 +160,8 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
 
   //auto-encoder/anomaly trigger set-up
   std::string fullPathToModel(std::getenv("CMSSW_BASE"));
-  fullPathToModel.append(iConfig.getParameter< string >("anomalyModelLocation"));
-  produces< float >("anomalyScore");
+  fullPathToModel.append(iConfig.getParameter<string>("anomalyModelLocation"));
+  produces<float>("anomalyScore");
 
   metaGraph = tensorflow::loadMetaGraph(fullPathToModel);
   //run a tensorflow session here
@@ -201,7 +199,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     edm::LogError("L1TCaloSummary") << "UCT: Failed to get regions from region collection!";
   iEvent.getByToken(regionToken, regionCollection);
   //We need to create a tensorflow tensor to serve as input into the anomaly model scoring,
-  tensorflow::Tensor modelInput(tensorflow::DT_FLOAT, {1, 18, 14, 1}); //batch of 1 tensor, shape 18, 14, 1 
+  tensorflow::Tensor modelInput(tensorflow::DT_FLOAT, {1, 18, 14, 1});  //batch of 1 tensor, shape 18, 14, 1
   for (const L1CaloRegion& i : *regionCollection) {
     UCTRegionIndex r = g.getUCTRegionIndexFromL1CaloRegion(i.gctEta(), i.gctPhi());
     UCTTowerIndex t = g.getUCTTowerIndexFromL1CaloRegion(r, i.raw());
@@ -220,13 +218,13 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     //We take 4 off of the GCT eta/iEta.
     //iEta taken from this ranges from 4-17, (I assume reserving lower and higher for forward regions)
     //So our first index, index 0, is technically iEta=4, and so-on.
-    modelInput.tensor< float, 4 >()(0, i.gctPhi(), i.gctEta()-4, 0) = i.et();
+    modelInput.tensor<float, 4>()(0, i.gctPhi(), i.gctEta() - 4, 0) = i.et();
   }
   //create vector for model outputs
-  std::vector< tensorflow::Tensor > anomalyOutput;
-  tensorflow::run(session, { { "serving_default_In:0", modelInput } }, { "StatefulPartitionedCall:0" }, &anomalyOutput);
+  std::vector<tensorflow::Tensor> anomalyOutput;
+  tensorflow::run(session, {{"serving_default_In:0", modelInput}}, {"StatefulPartitionedCall:0"}, &anomalyOutput);
   //*actually* get the anomaly score in simpler c++ types available for use later
-  *anomalyScore = anomalyOutput[0].matrix< float >()(0, 0);
+  *anomalyScore = anomalyOutput[0].matrix<float>()(0, 0);
 
   summaryCard->setRegionData(inputRegions);
 

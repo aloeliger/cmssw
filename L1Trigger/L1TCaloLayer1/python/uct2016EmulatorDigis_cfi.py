@@ -48,5 +48,5 @@ pumLUT17p=  cms.vdouble(3.28, 2.64, 2.26, 2.23, 1.97, 1.89, 7.61, 2.27, 2.33, 2.
                                       verbose = cms.bool(False),
                                       # See UCTLayer1.hh for firmware version
                                       firmwareVersion = cms.int32(1),
-                                      anomalyModelLocation = cms.string("/src/L1Trigger/L1TCaloLayer1/data/qmodel/"),
+                                      anomalyModelLocation = cms.string("/src/L1Trigger/L1TCaloLayer1/data/ADmodel/"),
                                       )

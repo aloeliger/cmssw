@@ -222,7 +222,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   }
   //create vector for model outputs
   std::vector<tensorflow::Tensor> anomalyOutput;
-  tensorflow::run(session, {{"serving_default_In:0", modelInput}}, {"StatefulPartitionedCall:0"}, &anomalyOutput);
+  tensorflow::run(session, {{"serving_default_input:0", modelInput}}, {"StatefulPartitionedCall:0"}, &anomalyOutput);
   //*actually* get the anomaly score in simpler c++ types available for use later
   *anomalyScore = anomalyOutput[0].matrix<float>()(0, 0);
 

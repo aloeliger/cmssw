@@ -209,6 +209,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   //bit accurate inputs first need to be stored as a vector of floats, that we can then convert later using some of the 
   //HLS4ML tools...
   std::vector<float> BAmodelInput;
+  BAmodelInput.resize(18*14);
   for (const L1CaloRegion& i : *regionCollection) {
     UCTRegionIndex r = g.getUCTRegionIndexFromL1CaloRegion(i.gctEta(), i.gctPhi());
     UCTTowerIndex t = g.getUCTTowerIndexFromL1CaloRegion(r, i.raw());
@@ -228,15 +229,9 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     //iEta taken from this ranges from 4-17, (I assume reserving lower and higher for forward regions)
     //So our first index, index 0, is technically iEta=4, and so-on.
     modelInput.tensor<float, 4>()(0, i.gctPhi(), i.gctEta() - 4, 0) = i.et();
+    //The emulator firmware implementation/hls4ml reads this iniitally as a flat vector, in the same order.
+    BAmodelInput.at(14*i.gctPhi()+(i.gctEta() - 4)) = i.et();
   }
-  //flatten the input 
-  for (int i = 0; i < modelInput.dim_size(2); i++)
-    {
-      for (int j = 0; j < modelInput.dim_size(1); j++)
-	{
-	  BAmodelInput.push_back( modelInput.tensor<float, 4>()(0, j, i, 0) );
-	}
-    }
   //create vector for model outputs
   std::vector<tensorflow::Tensor> anomalyOutput;
   tensorflow::run(session, {{"serving_default_input:0", modelInput}}, {"StatefulPartitionedCall:0"}, &anomalyOutput);

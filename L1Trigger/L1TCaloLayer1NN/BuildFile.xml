@@ -1,0 +1,5 @@
+<flags CppFlags="-Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-label -Wno-int-in-bool-context -Wno-maybe-uninitialized -Wno-uninitialized -Wno-extra"/>
+<flags CxxFlags="-Wno-sign-compare -Wno-unused-label -Wno-unused-variable -Wno-type-limits"/>
+<export>
+  <lib name="1"/>
+</export>

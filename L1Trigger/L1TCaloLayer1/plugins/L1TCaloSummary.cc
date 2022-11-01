@@ -64,9 +64,11 @@ using namespace std;
 //includes for the auto-encoder/anomaly trigger
 #include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
 #include <string>
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.h"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.cpp"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/nnet_helpers.h"
+#include "L1Trigger/L1TCaloLayer1NN/interface/myproject.h"
+#include "L1Trigger/L1TCaloLayer1NN/interface/nnet_utils/nnet_helpers.h"
+//#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.h"
+//#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/nnet_helpers.h"
+//#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.cpp"
 #include <bitset>
 
 //

@@ -38,22 +38,22 @@ void myproject(
 #ifndef __SYNTHESIS__
     static bool loaded_weights = false;
     std::string w2WeightsLocation( std::getenv("CMSSW_BASE") );
-    w2WeightsLocation.append((string)"/src/L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/firmware/weights/w2.txt");
+    w2WeightsLocation.append((string)"/src/L1Trigger/L1TCaloLayer1/data/weights/w2.txt");
 
     std::string b2WeightsLocation( std::getenv("CMSSW_BASE") ); 
-    b2WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/firmware/weights/b2.txt" );
+    b2WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/data/weights/b2.txt" );
     
     std::string s4WeightsLocation( std::getenv("CMSSW_BASE") );
-    s4WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/firmware/weights/s4.txt" );
+    s4WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/data/weights/s4.txt" );
 
     std::string b4WeightsLocation(std::getenv("CMSSW_BASE")); 
-    b4WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/firmware/weights/b4.txt" );
+    b4WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/data/weights/b4.txt" );
     
     std::string w6WeightsLocation(std::getenv("CMSSW_BASE")); 
-    w6WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/firmware/weights/w6.txt" );
+    w6WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/data/weights/w6.txt" );
     
     std::string b6WeightsLocation(std::getenv("CMSSW_BASE"));
-    b6WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/firmware/weights/b6.txt" );
+    b6WeightsLocation.append( (string)"/src/L1Trigger/L1TCaloLayer1/data/weights/b6.txt" );
         
     if (!loaded_weights) {
         //hls-fpga-machine-learning insert load weights

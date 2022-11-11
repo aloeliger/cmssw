@@ -7,4 +7,7 @@
 <use name="L1Trigger/L1TCaloLayer1"/>
 <use name="L1Trigger/L1TCaloLayer1NN"/>
 <use name="PhysicsTools/TensorFlow"/>
+<flags CppFlags="-Wno-unknown-pragmas -Wno-int-in-bool-context -Wno-maybe-uninitialized -Wno-uninitialized"/>
+<flags CxxFlags="-Wno-sign-compare -Wno-unused-label -Wno-unused-variable -Wno-type-limits"/>
+<flags CppDefines='WEIGHTS_DIR=\"$(CMSSW_BASE)/src/L1Trigger/L1TCaloLayer1NN/interface/weights/\"'/>
 <flags EDM_PLUGIN="1"/>

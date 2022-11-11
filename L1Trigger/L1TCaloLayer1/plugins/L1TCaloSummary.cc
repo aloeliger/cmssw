@@ -66,7 +66,7 @@ using namespace std;
 #include <string>
 #include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.h"
 #include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.cpp"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/nnet_helpers.h"
+#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/nnet_utils/nnet_helpers.h"
 #include <bitset>
 
 //

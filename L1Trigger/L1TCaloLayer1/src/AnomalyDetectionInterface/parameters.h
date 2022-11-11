@@ -4,23 +4,23 @@
 #include "ap_int.h"
 #include "ap_fixed.h"
 
-#include "nnet_helpers.h"
+#include "nnet_utils/nnet_helpers.h"
 //hls-fpga-machine-learning insert includes
-#include "nnet_activation.h"
-#include "nnet_activation_stream.h"
-#include "nnet_batchnorm.h"
-#include "nnet_batchnorm_stream.h"
-#include "nnet_dense.h"
-#include "nnet_dense_compressed.h"
-#include "nnet_dense_stream.h"
+#include "nnet_utils/nnet_activation.h"
+#include "nnet_utils/nnet_activation_stream.h"
+#include "nnet_utils/nnet_batchnorm.h"
+#include "nnet_utils/nnet_batchnorm_stream.h"
+#include "nnet_utils/nnet_dense.h"
+#include "nnet_utils/nnet_dense_compressed.h"
+#include "nnet_utils/nnet_dense_stream.h"
  
-//hls-fpga-machine-learning insert firmware/weights/
-#include "firmware/weights//w2.h"
-#include "firmware/weights//b2.h"
-#include "firmware/weights//s4.h"
-#include "firmware/weights//b4.h"
-#include "firmware/weights//w6.h"
-#include "firmware/weights//b6.h"
+//hls-fpga-machine-learning insert weights
+#include "weights/w2.h"
+#include "weights/b2.h"
+#include "weights/s4.h"
+#include "weights/b4.h"
+#include "weights/w6.h"
+#include "weights/b6.h"
 
 //hls-fpga-machine-learning insert layer-config
 // dense1

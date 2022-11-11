@@ -35,8 +35,7 @@ namespace nnet {
 #ifndef __SYNTHESIS__
 
 #ifndef WEIGHTS_DIR
-  //#define WEIGHTS_DIR "weights"
-#define WEIGHTS_DIR ""
+#define WEIGHTS_DIR "weights"
 #endif
 
 template<class T, size_t SIZE>
@@ -318,7 +317,7 @@ void copy_data_axi(std::vector<src_T> src, dst_T dst[SIZE]) {
 
 template<class res_T, size_t SIZE>
 void print_result(res_T result[SIZE], std::ostream &out, bool keep = false) {
-    for(unsigned int i = 0; i < SIZE; i++) {
+    for(int i = 0; i < SIZE; i++) {
         out << result[i] << " ";
     }
     out << std::endl;

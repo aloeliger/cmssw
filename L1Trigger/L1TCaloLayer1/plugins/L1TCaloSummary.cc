@@ -121,8 +121,8 @@ private:
   tensorflow::Session* session;
 
   //stuff for using the precompiled model
-  //ModelLoader loader;
-  //HLS4MLModel* model;
+  ModelLoader loader;
+  HLS4MLModel* model;
 };
 
 //
@@ -148,8 +148,8 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
       boostedJetPtFactor(iConfig.getParameter<double>("boostedJetPtFactor")),
       verbose(iConfig.getParameter<bool>("verbose")),
       fwVersion(iConfig.getParameter<int>("firmwareVersion")),
-      regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis")))//,
-      //loader(ModelLoader(((std::string)std::getenv("CMSSW_BASE")).append(iConfig.getParameter<string>("compiledAnomalyModelLocation"))))
+      regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis"))),
+      loader(ModelLoader(((std::string)std::getenv("CMSSW_BASE")).append(iConfig.getParameter<string>("compiledAnomalyModelLocation"))))
 {
   std::vector<double> pumLUTData;
   char pumLUTString[10];
@@ -177,19 +177,19 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
   fullPathToModel.append(iConfig.getParameter<string>("anomalyModelLocation"));
   produces<float>("anomalyScore");
   produces<float>("bitAccurateAnomalyScore");
-  //produces<float>("precompiledModelAnomalyScore");
+  produces<float>("precompiledModelAnomalyScore");
 
   metaGraph = tensorflow::loadMetaGraph(fullPathToModel);
   //run a tensorflow session here
   session = tensorflow::createSession(metaGraph, fullPathToModel);
  
-  //model = loader.load_model();
+  model = loader.load_model();
 }
 
 L1TCaloSummary::~L1TCaloSummary() {
   if (summaryCard != nullptr)
     delete summaryCard;
-  //loader.destroy_model();
+  loader.destroy_model();
 }
 
 //
@@ -204,7 +204,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   //This will hold the score we emplace into the event
   std::unique_ptr<float> anomalyScore(new float);
   std::unique_ptr<float> bitAccurateAnomalyScore(new float);
-  //std::unique_ptr<float> precompiledModelAnomalyScore(new float);
+  std::unique_ptr<float> precompiledModelAnomalyScore(new float);
 
   UCTGeometry g;
 
@@ -226,7 +226,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   //bit accurate inputs first need to be stored as a vector of floats, that we can then convert later using some of the 
   //HLS4ML tools...
   std::vector<float> BAmodelInput;
-  //ap_ufixed <10,10> precompiledModelInput[252];
+  ap_ufixed <10,10> precompiledModelInput[252];
   BAmodelInput.resize(18*14);
   for (const L1CaloRegion& i : *regionCollection) {
     UCTRegionIndex r = g.getUCTRegionIndexFromL1CaloRegion(i.gctEta(), i.gctPhi());
@@ -250,7 +250,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     modelInput.tensor<float, 3>()(0, 14*i.gctPhi()+(i.gctEta() - 4), 0) = i.et();
     //The emulator firmware implementation/hls4ml reads this iniitally as a flat vector, in the same order.
     BAmodelInput.at(14*i.gctPhi()+(i.gctEta() - 4)) = i.et();
-    //precompiledModelInput[14*i.gctPhi()+(i.gctEta() - 4)] = i.et();
+    precompiledModelInput[14*i.gctPhi()+(i.gctEta() - 4)] = i.et();
   }
   //create vector for model outputs
   std::vector<tensorflow::Tensor> anomalyOutput;
@@ -267,14 +267,12 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   *bitAccurateAnomalyScore = (float)layer10_out[0];
 
   //run things off of the precompiled model
-  /*
   ap_fixed<11,5> precompiledModelResult [1];
   model->prepare_input(precompiledModelInput);
   model->predict();
   model->read_result(precompiledModelResult);
 
   *precompiledModelAnomalyScore = precompiledModelResult[0].to_float();
-  */
 
   summaryCard->setRegionData(inputRegions);
 
@@ -342,7 +340,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   //Write out anomaly score
   iEvent.put(std::move(anomalyScore), "anomalyScore");
   iEvent.put(std::move(bitAccurateAnomalyScore), "bitAccurateAnomalyScore");
-  //iEvent.put(std::move(precompiledModelAnomalyScore), "precompiledModelAnomalyScore");
+  iEvent.put(std::move(precompiledModelAnomalyScore), "precompiledModelAnomalyScore");
 }
 
 void L1TCaloSummary::print() {}

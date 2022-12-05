@@ -267,7 +267,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   *bitAccurateAnomalyScore = (float)layer10_out[0];
 
   //run things off of the precompiled model
-  ap_fixed<11,5> precompiledModelResult [1];
+  ap_fixed<12,10> precompiledModelResult [1];
   model->prepare_input(precompiledModelInput);
   model->predict();
   model->read_result(precompiledModelResult);

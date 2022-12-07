@@ -188,6 +188,12 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
 L1TCaloSummary::~L1TCaloSummary() {
   if (summaryCard != nullptr)
     delete summaryCard;
+  
+  tensorflow::closeSession(session);
+  session=nullptr;
+  delete metaGraph;
+  metaGraph = nullptr;
+
   loader.destroy_model();
 }
 

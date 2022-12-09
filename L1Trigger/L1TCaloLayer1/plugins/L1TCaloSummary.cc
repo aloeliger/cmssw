@@ -61,17 +61,10 @@ using namespace l1tcalo;
 using namespace l1extra;
 using namespace std;
 
-//includes for the auto-encoder/anomaly trigger
-#include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
+//HLS4ML compiled emulator modeling
 #include <string>
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.h"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.cpp"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/nnet_utils/nnet_helpers.h"
-#include <bitset>
-
-//includes for the precompiled model
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/emulator.h"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/ap_types/ap_fixed.h"
+#include "L1Trigger/L1TCaloLayer1/src/HLS_emulator.hh"
+#include "ap_fixed.h"
 
 //
 // class declaration
@@ -116,11 +109,7 @@ private:
   UCTLayer1* layer1;
   UCTSummaryCard* summaryCard;
 
-  //Used for the auto-encoder/anomaly trigger emulation
-  tensorflow::MetaGraphDef* metaGraph;
-  tensorflow::Session* session;
-
-  //stuff for using the precompiled model
+  //HLS4ML emulator objects
   ModelLoader loader;
   HLS4MLModel* model;
 };
@@ -149,7 +138,8 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
       verbose(iConfig.getParameter<bool>("verbose")),
       fwVersion(iConfig.getParameter<int>("firmwareVersion")),
       regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis"))),
-      loader(ModelLoader(((std::string)std::getenv("CMSSW_BASE")).append(iConfig.getParameter<string>("compiledAnomalyModelLocation")))){
+      loader(ModelLoader(((std::string)std::getenv("CMSSW_BASE"))
+                             .append(iConfig.getParameter<string>("compiledAnomalyModelLocation")))) {
   std::vector<double> pumLUTData;
   char pumLUTString[10];
   for (uint32_t pumBin = 0; pumBin < nPumBins; pumBin++) {
@@ -171,28 +161,14 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
   produces<L1JetParticleCollection>("Boosted");
   summaryCard = new UCTSummaryCard(&pumLUT, jetSeed, tauSeed, tauIsolationFactor, eGammaSeed, eGammaIsolationFactor);
 
-  //auto-encoder/anomaly trigger set-up
-  std::string fullPathToModel(std::getenv("CMSSW_BASE"));
-  fullPathToModel.append(iConfig.getParameter<string>("anomalyModelLocation"));
+  //Anomaly model/ CICADA model and output
   produces<float>("anomalyScore");
-  produces<float>("bitAccurateAnomalyScore");
-  produces<float>("precompiledModelAnomalyScore");
-
-  metaGraph = tensorflow::loadMetaGraph(fullPathToModel);
-  //run a tensorflow session here
-  session = tensorflow::createSession(metaGraph, fullPathToModel);
- 
   model = loader.load_model();
 }
 
 L1TCaloSummary::~L1TCaloSummary() {
   if (summaryCard != nullptr)
     delete summaryCard;
-  
-  tensorflow::closeSession(session);
-  session=nullptr;
-  delete metaGraph;
-  metaGraph = nullptr;
 
   loader.destroy_model();
 }
@@ -208,8 +184,6 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   std::unique_ptr<L1JetParticleCollection> bJetCands(new L1JetParticleCollection);
   //This will hold the score we emplace into the event
   std::unique_ptr<float> anomalyScore(new float);
-  std::unique_ptr<float> bitAccurateAnomalyScore(new float);
-  std::unique_ptr<float> precompiledModelAnomalyScore(new float);
 
   UCTGeometry g;
 
@@ -224,13 +198,12 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   if (!iEvent.getByToken(regionToken, regionCollection))
     edm::LogError("L1TCaloSummary") << "UCT: Failed to get regions from region collection!";
   iEvent.getByToken(regionToken, regionCollection);
-  //We need to create a tensorflow tensor to serve as input into the anomaly model scoring,
-  tensorflow::Tensor modelInput(tensorflow::DT_FLOAT, {1, 18, 14, 1});  //batch of 1 tensor, shape 18, 14, 1
-  //bit accurate inputs first need to be stored as a vector of floats, that we can then convert later using some of the 
-  //HLS4ML tools...
-  std::vector<float> BAmodelInput;
-  ap_ufixed <10,10> precompiledModelInput[252];
-  BAmodelInput.resize(18*14);
+  //Input into the model is in the input_t format as defined in the model's firmware/defines.h
+  //For the CICADA 2018 Run A model, it takes all 252 regions, in a single vector, from low to high phi, low to high eta.
+  //TODO: Would be good to have this synchronized to the firmware/defines.h used to make the model's .so
+  //...But this may require the inclusion of additional files into CMSSW,
+  //with no guarantee that it will be anymore synchronized than this is.
+  ap_ufixed<10, 10> precompiledModelInput[252];
   for (const L1CaloRegion& i : *regionCollection) {
     UCTRegionIndex r = g.getUCTRegionIndexFromL1CaloRegion(i.gctEta(), i.gctPhi());
     UCTTowerIndex t = g.getUCTTowerIndexFromL1CaloRegion(r, i.raw());
@@ -245,36 +218,23 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     UCTRegion* test = new UCTRegion(crate, card, negativeEta, region, fwVersion);
     test->setRegionSummary(i.raw());
     inputRegions.push_back(test);
-    //This *should* fill the tensor in the proper order to be fed to the anomaly model
+    //This should fill the tensor in the proper order to be fed to the anomaly model
     //We take 4 off of the GCT eta/iEta.
     //iEta taken from this ranges from 4-17, (I assume reserving lower and higher for forward regions)
     //So our first index, index 0, is technically iEta=4, and so-on.
-    modelInput.tensor<float, 4>()(0, i.gctPhi(), i.gctEta() - 4, 0) = i.et();
-    //The emulator firmware implementation/hls4ml reads this iniitally as a flat vector, in the same order.
-    BAmodelInput.at(14*i.gctPhi()+(i.gctEta() - 4)) = i.et();
-    precompiledModelInput[14*i.gctPhi()+(i.gctEta() - 4)] = i.et();
+    precompiledModelInput[14 * i.gctPhi() + (i.gctEta() - 4)] = i.et();
   }
-  //create vector for model outputs
-  std::vector<tensorflow::Tensor> anomalyOutput;
-  tensorflow::run(session, {{"serving_default_input:0", modelInput}}, {"StatefulPartitionedCall:0"}, &anomalyOutput);
-  //*actually* get the anomaly score in simpler c++ types available for use later
-  *anomalyScore = anomalyOutput[0].matrix<float>()(0, 0);
-  //create bit accurate input into the model
-  input_t Inputs[N_INPUT_1_1];
-  nnet::copy_data<float, input_t, 0, N_INPUT_1_1>(BAmodelInput, Inputs);
-  result_t layer6_out[N_LAYER_6];
-
-  myproject(Inputs,layer6_out);
-  
-  *bitAccurateAnomalyScore = (float)layer6_out[0];
-
-  //run things off of the precompiled model
-  ap_fixed<11,5> precompiledModelResult [1];
+  //run the precompiled CICADA model
+  //Output of the model is taken from the model's firmware/defines.h file again
+  //this time in is in result_t format
+  //TODO: Similarly to the above, it might be nice to have a way to synchronize this to the model being used
+  ap_fixed<11, 5> precompiledModelResult[1];
   model->prepare_input(precompiledModelInput);
   model->predict();
   model->read_result(precompiledModelResult);
 
-  *precompiledModelAnomalyScore = precompiledModelResult[0].to_float();
+  *anomalyScore =
+      precompiledModelResult[0].to_float();  //convert the fixed precision result to a proper c++ floating point
 
   summaryCard->setRegionData(inputRegions);
 
@@ -341,8 +301,6 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   iEvent.put(std::move(bJetCands), "Boosted");
   //Write out anomaly score
   iEvent.put(std::move(anomalyScore), "anomalyScore");
-  iEvent.put(std::move(bitAccurateAnomalyScore), "bitAccurateAnomalyScore");
-  iEvent.put(std::move(precompiledModelAnomalyScore), "precompiledModelAnomalyScore");
 }
 
 void L1TCaloSummary::print() {}

@@ -12,9 +12,7 @@ public:
   virtual void prepare_input(std::any input) = 0;
   virtual void predict() = 0;
   virtual void read_result(std::any result) = 0;
-  //TODO: A virtual destructor should be included here to prevent SCRAM compiler warnings
-  //However, it would be necessary to ensure that both the general and CICADA specific implementations
-  //in the compiled model also matched up to this to not potentially cause side effects.
+  virtual ~HLS4MLModel() = default;
 };
 
 typedef HLS4MLModel* create_model_cls();

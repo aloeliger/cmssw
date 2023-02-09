@@ -6,7 +6,7 @@
 #ifndef B6_H_
 #define B6_H_
 
-#ifndef __SYNTHESIS__
+#ifdef LOAD_WEIGHTS_FROM_TXT
 bias6_t b6[1];
 #else
 bias6_t b6[1] = {0};

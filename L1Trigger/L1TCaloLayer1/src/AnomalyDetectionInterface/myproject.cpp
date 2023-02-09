@@ -32,7 +32,7 @@ void myproject(
     #pragma HLS INTERFACE ap_vld port=Inputs,layer6_out 
     #pragma HLS PIPELINE 
 
-#ifndef __SYNTHESIS__
+#ifdef LOAD_WEIGHTS_FROM_TXT
     static bool loaded_weights = false;
     if (!loaded_weights) {
         //hls-fpga-machine-learning insert load weights

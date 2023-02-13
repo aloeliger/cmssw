@@ -114,7 +114,6 @@ private:
   edm::EDGetTokenT<L1CaloRegionCollection> regionToken;
 
   UCTLayer1* layer1;
-  UCTSummaryCard* summaryCard;
 
   //Used for the auto-encoder/anomaly trigger emulation
   tensorflow::MetaGraphDef* metaGraph;
@@ -149,7 +148,8 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
       verbose(iConfig.getParameter<bool>("verbose")),
       fwVersion(iConfig.getParameter<int>("firmwareVersion")),
       regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis"))),
-      loader(ModelLoader(((std::string)std::getenv("CMSSW_BASE")).append(iConfig.getParameter<string>("compiledAnomalyModelLocation")))){
+      loader(ModelLoader(((std::string)std::getenv("CMSSW_BASE"))
+                             .append(iConfig.getParameter<string>("compiledAnomalyModelLocation")))) {
   std::vector<double> pumLUTData;
   char pumLUTString[10];
   for (uint32_t pumBin = 0; pumBin < nPumBins; pumBin++) {
@@ -180,14 +180,13 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
   metaGraph = tensorflow::loadMetaGraph(fullPathToModel);
   //run a tensorflow session here
   session = tensorflow::createSession(metaGraph, fullPathToModel);
- 
+
   model = loader.load_model();
 }
 
 L1TCaloSummary::~L1TCaloSummary() {
-  
   tensorflow::closeSession(session);
-  session=nullptr;
+  session = nullptr;
   delete metaGraph;
   metaGraph = nullptr;
 
@@ -214,7 +213,9 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   // independently creating regions from TPGs for processing by the summary card. This results
   // in a single region vector of size 252 whereas from independent creation we had 3*6 vectors
   // of size 7*2. Indices are mapped in UCTSummaryCard accordingly.
-  summaryCard = new UCTSummaryCard(&pumLUT, jetSeed, tauSeed, tauIsolationFactor, eGammaSeed, eGammaIsolationFactor);
+  //summaryCard = new UCTSummaryCard(&pumLUT, jetSeed, tauSeed, tauIsolationFactor, eGammaSeed, eGammaIsolationFactor);
+  UCTSummaryCard summaryCard =
+      UCTSummaryCard(&pumLUT, jetSeed, tauSeed, tauIsolationFactor, eGammaSeed, eGammaIsolationFactor);
   std::vector<UCTRegion*> inputRegions;
   inputRegions.clear();
   edm::Handle<std::vector<L1CaloRegion>> regionCollection;
@@ -223,11 +224,11 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   iEvent.getByToken(regionToken, regionCollection);
   //We need to create a tensorflow tensor to serve as input into the anomaly model scoring,
   tensorflow::Tensor modelInput(tensorflow::DT_FLOAT, {1, 18, 14, 1});  //batch of 1 tensor, shape 18, 14, 1
-  //bit accurate inputs first need to be stored as a vector of floats, that we can then convert later using some of the 
+  //bit accurate inputs first need to be stored as a vector of floats, that we can then convert later using some of the
   //HLS4ML tools...
   std::vector<float> BAmodelInput;
-  ap_ufixed <10,10> precompiledModelInput[252];
-  BAmodelInput.resize(18*14);
+  ap_ufixed<10, 10> precompiledModelInput[252];
+  BAmodelInput.resize(18 * 14);
   for (const L1CaloRegion& i : *regionCollection) {
     UCTRegionIndex r = g.getUCTRegionIndexFromL1CaloRegion(i.gctEta(), i.gctPhi());
     UCTTowerIndex t = g.getUCTTowerIndexFromL1CaloRegion(r, i.raw());
@@ -248,8 +249,8 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     //So our first index, index 0, is technically iEta=4, and so-on.
     modelInput.tensor<float, 4>()(0, i.gctPhi(), i.gctEta() - 4, 0) = i.et();
     //The emulator firmware implementation/hls4ml reads this iniitally as a flat vector, in the same order.
-    BAmodelInput.at(14*i.gctPhi()+(i.gctEta() - 4)) = i.et();
-    precompiledModelInput[14*i.gctPhi()+(i.gctEta() - 4)] = i.et();
+    BAmodelInput.at(14 * i.gctPhi() + (i.gctEta() - 4)) = i.et();
+    precompiledModelInput[14 * i.gctPhi() + (i.gctEta() - 4)] = i.et();
   }
   //create vector for model outputs
   std::vector<tensorflow::Tensor> anomalyOutput;
@@ -261,21 +262,21 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   nnet::copy_data<float, input_t, 0, N_INPUT_1_1>(BAmodelInput, Inputs);
   result_t layer6_out[N_LAYER_6];
 
-  myproject(Inputs,layer6_out);
-  
+  myproject(Inputs, layer6_out);
+
   *bitAccurateAnomalyScore = (float)layer6_out[0];
 
   //run things off of the precompiled model
-  ap_fixed<11,5> precompiledModelResult [1];
+  ap_fixed<11, 5> precompiledModelResult[1];
   model->prepare_input(precompiledModelInput);
   model->predict();
   model->read_result(precompiledModelResult);
 
   *precompiledModelAnomalyScore = precompiledModelResult[0].to_float();
 
-  summaryCard->setRegionData(inputRegions);
+  summaryCard.setRegionData(inputRegions);
 
-  if (!summaryCard->process()) {
+  if (!summaryCard.process()) {
     edm::LogError("L1TCaloSummary") << "UCT: Failed to process summary card" << std::endl;
     exit(1);
   }
@@ -285,7 +286,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   double phi = -999.;
   double mass = 0;
 
-  std::list<UCTObject*> boostedJetObjs = summaryCard->getBoostedJetObjs();
+  std::list<UCTObject*> boostedJetObjs = summaryCard.getBoostedJetObjs();
   for (std::list<UCTObject*>::const_iterator i = boostedJetObjs.begin(); i != boostedJetObjs.end(); i++) {
     const UCTObject* object = *i;
     pt = ((double)object->et()) * caloScaleFactor * boostedJetPtFactor;
@@ -340,7 +341,6 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   iEvent.put(std::move(anomalyScore), "anomalyScore");
   iEvent.put(std::move(bitAccurateAnomalyScore), "bitAccurateAnomalyScore");
   iEvent.put(std::move(precompiledModelAnomalyScore), "precompiledModelAnomalyScore");
-  delete summaryCard;
 }
 
 void L1TCaloSummary::print() {}

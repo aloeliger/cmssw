@@ -226,7 +226,6 @@ void L1TStage2uGT::analyze(const edm::Event& evt, const edm::EventSetup& evtSetu
   //algoBits_->Fill(-1.); // fill underflow to normalize // FIXME: needed?
   for (int ibx = uGtAlgs->getFirstBX(); ibx <= uGtAlgs->getLastBX(); ++ibx) {
     for (auto itr = uGtAlgs->begin(ibx); itr != uGtAlgs->end(ibx); ++itr) {  // FIXME: redundant loop?
-
       // Fills prescale factor set histogram
       prescaleFactorSet_->Fill(lumi, itr->getPreScColumn());
 

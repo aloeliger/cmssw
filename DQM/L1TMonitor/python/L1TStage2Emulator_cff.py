@@ -207,17 +207,16 @@ from DQM.L1TMonitor.L1TStage2uGTEmul_cfi import *
 from DQM.L1TMonitor.L1TdeStage2uGT_cfi import *
 
 #-------------------------------------------------
-# Stage2 Emulator and Emulator DQM Sequences
-
+# Stage2 Emulator and Emulator DQM Sequence
 # sequence to run for every event
 l1tStage2EmulatorOnlineDQM = cms.Sequence(
-    l1tdeStage2Bmtf +
-    l1tdeStage2BmtfSecond +
-    l1tdeStage2Omtf +
-    l1tdeCSCTPG +
-    l1tdeStage2CppfOnlineDQMSeq +
-    l1tdeStage2EmtfOnlineDQMSeq +
-    l1tStage2uGMTEmulatorOnlineDQMSeq +
+    #l1tdeStage2Bmtf +
+    #l1tdeStage2BmtfSecond +
+    #l1tdeStage2Omtf +
+    #l1tdeCSCTPG +
+    #l1tdeStage2CppfOnlineDQMSeq +
+    #l1tdeStage2EmtfOnlineDQMSeq +
+    #l1tStage2uGMTEmulatorOnlineDQMSeq +
     l1tdeStage2uGT +
     l1tStage2uGtEmul
 )
@@ -225,8 +224,8 @@ l1tStage2EmulatorOnlineDQM = cms.Sequence(
 _run3_l1tStage2EmulatorOnlineDQM = l1tStage2EmulatorOnlineDQM.copy()
 _run3_l1tStage2EmulatorOnlineDQM += l1tdeGEMTPG
 
-from Configuration.Eras.Modifier_run3_GEM_cff import run3_GEM
-run3_GEM.toReplaceWith( l1tStage2EmulatorOnlineDQM, _run3_l1tStage2EmulatorOnlineDQM )
+#from Configuration.Eras.Modifier_run3_GEM_cff import run3_GEM
+#run3_GEM.toReplaceWith( l1tStage2EmulatorOnlineDQM, _run3_l1tStage2EmulatorOnlineDQM )
 
 _run3shower_l1tStage2EmulatorOnlineDQM = l1tStage2EmulatorOnlineDQM.copy()
 run3_GEM.toReplaceWith( l1tStage2EmulatorOnlineDQM, cms.Sequence(_run3shower_l1tStage2EmulatorOnlineDQM + l1tdeCSCTPGShower) )

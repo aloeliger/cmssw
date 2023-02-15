@@ -151,6 +151,18 @@ void L1TdeStage2uGT::analyze(const edm::Event& event, const edm::EventSetup& es)
           if (not dummy)
             edm::LogWarning("L1TdeStage2uGT") << "Could not find prescale value for algobit: " << algoBit << std::endl;
 
+	  if (it_data->getAlgoDecisionFinal(92) == 1) {
+	    std::cout << "@@@ L1_SingleMuShower_Nominal! Run " << event.run() << ", LS " << event.luminosityBlock() << ", Event " << event.id().event() << std::endl;
+	    std::cout << "    ----> Data: " << it_data->getAlgoDecisionFinal(92) << std::endl;
+	    std::cout << "    ----> Emul: " << it_emul->getAlgoDecisionFinal(92) << std::endl;
+	    
+	  }
+	  if (it_data->getAlgoDecisionFinal(93) == 1) {
+	    std::cout << "@@@ L1_SingleMuShower_Tight! Run " << event.run() << ", LS " << event.luminosityBlock() << ", Event " << event.id().event() << std::endl;
+	    std::cout << "    ----> Data: " << it_data->getAlgoDecisionFinal(93) << std::endl;
+	    std::cout << "    ----> Emul: " << it_emul->getAlgoDecisionFinal(93) << std::endl;
+	  }
+	  
           if (prescale != 1)
             unprescaled = false;
 
@@ -164,6 +176,7 @@ void L1TdeStage2uGT::analyze(const edm::Event& event, const edm::EventSetup& es)
               fillHist(m_SummaryHistograms, hsummary, float(NFinalMismatchEmulNoData), 1.);
               wt = -1;
             }
+
             fillHist(m_HistNamesFinal, hname, float(algoBit), 1.);
             finalDecisionMismatches_vs_LS->Fill(float(lumi), wt);
           }

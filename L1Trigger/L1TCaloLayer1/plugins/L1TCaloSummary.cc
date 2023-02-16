@@ -113,7 +113,7 @@ private:
 
   edm::EDGetTokenT<L1CaloRegionCollection> regionToken;
 
-  UCTLayer1* layer1;
+  //UCTLayer1* layer1;
 
   //Used for the auto-encoder/anomaly trigger emulation
   tensorflow::MetaGraphDef* metaGraph;
@@ -203,9 +203,9 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
 
   std::unique_ptr<L1JetParticleCollection> bJetCands(new L1JetParticleCollection);
   //This will hold the score we emplace into the event
-  std::unique_ptr<float> anomalyScore(new float);
-  std::unique_ptr<float> bitAccurateAnomalyScore(new float);
-  std::unique_ptr<float> precompiledModelAnomalyScore(new float);
+  std::unique_ptr<float> anomalyScore = std::make_unique<float>();
+  std::unique_ptr<float> bitAccurateAnomalyScore = std::make_unique<float>();
+  std::unique_ptr<float> precompiledModelAnomalyScore = std::make_unique<float>();
 
   UCTGeometry g;
 

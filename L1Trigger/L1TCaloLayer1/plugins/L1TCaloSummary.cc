@@ -64,10 +64,10 @@ using namespace std;
 //includes for the auto-encoder/anomaly trigger
 #include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
 #include <string>
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.h"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.cpp"
-#include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/nnet_utils/nnet_helpers.h"
-#include <bitset>
+// #include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.h"
+// #include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/myproject.cpp"
+// #include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/nnet_utils/nnet_helpers.h"
+// #include <bitset>
 
 //includes for the precompiled model
 #include "L1Trigger/L1TCaloLayer1/src/AnomalyDetectionInterface/emulator.h"
@@ -174,7 +174,7 @@ L1TCaloSummary::L1TCaloSummary(const edm::ParameterSet& iConfig)
   std::string fullPathToModel(std::getenv("CMSSW_BASE"));
   fullPathToModel.append(iConfig.getParameter<string>("anomalyModelLocation"));
   produces<float>("anomalyScore");
-  produces<float>("bitAccurateAnomalyScore");
+  // produces<float>("bitAccurateAnomalyScore");
   produces<float>("precompiledModelAnomalyScore");
 
   metaGraph = tensorflow::loadMetaGraph(fullPathToModel);
@@ -204,7 +204,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   std::unique_ptr<L1JetParticleCollection> bJetCands(new L1JetParticleCollection);
   //This will hold the score we emplace into the event
   std::unique_ptr<float> anomalyScore = std::make_unique<float>();
-  std::unique_ptr<float> bitAccurateAnomalyScore = std::make_unique<float>();
+  // std::unique_ptr<float> bitAccurateAnomalyScore = std::make_unique<float>();
   std::unique_ptr<float> precompiledModelAnomalyScore = std::make_unique<float>();
 
   UCTGeometry g;
@@ -226,9 +226,9 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   tensorflow::Tensor modelInput(tensorflow::DT_FLOAT, {1, 18, 14, 1});  //batch of 1 tensor, shape 18, 14, 1
   //bit accurate inputs first need to be stored as a vector of floats, that we can then convert later using some of the
   //HLS4ML tools...
-  std::vector<float> BAmodelInput;
+  // std::vector<float> BAmodelInput;
   ap_ufixed<10, 10> precompiledModelInput[252];
-  BAmodelInput.resize(18 * 14);
+  // BAmodelInput.resize(18 * 14);
   for (const L1CaloRegion& i : *regionCollection) {
     UCTRegionIndex r = g.getUCTRegionIndexFromL1CaloRegion(i.gctEta(), i.gctPhi());
     UCTTowerIndex t = g.getUCTTowerIndexFromL1CaloRegion(r, i.raw());
@@ -249,7 +249,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     //So our first index, index 0, is technically iEta=4, and so-on.
     modelInput.tensor<float, 4>()(0, i.gctPhi(), i.gctEta() - 4, 0) = i.et();
     //The emulator firmware implementation/hls4ml reads this iniitally as a flat vector, in the same order.
-    BAmodelInput.at(14 * i.gctPhi() + (i.gctEta() - 4)) = i.et();
+    // BAmodelInput.at(14 * i.gctPhi() + (i.gctEta() - 4)) = i.et();
     precompiledModelInput[14 * i.gctPhi() + (i.gctEta() - 4)] = i.et();
   }
   //create vector for model outputs
@@ -258,13 +258,13 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   //*actually* get the anomaly score in simpler c++ types available for use later
   *anomalyScore = anomalyOutput[0].matrix<float>()(0, 0);
   //create bit accurate input into the model
-  input_t Inputs[N_INPUT_1_1];
-  nnet::copy_data<float, input_t, 0, N_INPUT_1_1>(BAmodelInput, Inputs);
-  result_t layer6_out[N_LAYER_6];
+  // input_t Inputs[N_INPUT_1_1];
+  // nnet::copy_data<float, input_t, 0, N_INPUT_1_1>(BAmodelInput, Inputs);
+  // result_t layer6_out[N_LAYER_6];
 
-  myproject(Inputs, layer6_out);
+  //myproject(Inputs, layer6_out);
 
-  *bitAccurateAnomalyScore = (float)layer6_out[0];
+  //*bitAccurateAnomalyScore = (float)layer6_out[0];
 
   //run things off of the precompiled model
   ap_fixed<11, 5> precompiledModelResult[1];
@@ -339,7 +339,7 @@ void L1TCaloSummary::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) 
   iEvent.put(std::move(bJetCands), "Boosted");
   //Write out anomaly score
   iEvent.put(std::move(anomalyScore), "anomalyScore");
-  iEvent.put(std::move(bitAccurateAnomalyScore), "bitAccurateAnomalyScore");
+  // iEvent.put(std::move(bitAccurateAnomalyScore), "bitAccurateAnomalyScore");
   iEvent.put(std::move(precompiledModelAnomalyScore), "precompiledModelAnomalyScore");
 }
 

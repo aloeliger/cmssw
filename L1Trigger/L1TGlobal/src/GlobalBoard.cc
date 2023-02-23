@@ -13,7 +13,8 @@
  *                                       - fractional prescales
  * \author: E. Fontanesi                 - extended for three-body correlation conditions
  *
- * \author: E. Fontanesi, E. Yigitbasi   - fix for the muon showers (original implementation by S. Dildick, 2021)
+ * \author: E. Fontanesi, E. Yigitbasi, A. Loeliger (original implementation by S. Dildick, 2021)   
+ *                                       - fix for the muon shower triggers
  *
  * $Date$
  * $Revision$
@@ -386,10 +387,14 @@ void l1t::GlobalBoard::receiveMuonShowerObjectData(const edm::Event& iEvent,
 	     similarly to the description in the UTM library, where the conditions are four different objects.
            */
 
-          std::shared_ptr<l1t::MuonShower> musOneNominalInTime = std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
-          std::shared_ptr<l1t::MuonShower> musOneTightInTime = std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
-          std::shared_ptr<l1t::MuonShower> musOutOfTime0 = std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
-          std::shared_ptr<l1t::MuonShower> musOutOfTime1 = std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
+          std::shared_ptr<l1t::MuonShower> musOneNominalInTime =
+              std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
+          std::shared_ptr<l1t::MuonShower> musOneTightInTime =
+              std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
+          std::shared_ptr<l1t::MuonShower> musOutOfTime0 =
+              std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
+          std::shared_ptr<l1t::MuonShower> musOutOfTime1 =
+              std::make_shared<l1t::MuonShower>(false, false, false, false, false, false);
 
           musOneNominalInTime->setOneNominalInTime(mu->isOneNominalInTime());
           musOneTightInTime->setOneTightInTime(mu->isOneTightInTime());

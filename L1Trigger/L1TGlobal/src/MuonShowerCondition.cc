@@ -14,7 +14,7 @@
  *  
  * \author: S. Dildick (2021) - Rice University                                                    
  *         
- * \fixes by: E. Fontanesi, E. Yigitbasi (2023)                                                                                                
+ * \fixes by: E. Fontanesi, E. Yigitbasi, A. Loeliger (2023)                                                                                                
  *         
  */
 

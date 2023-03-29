@@ -1,0 +1,31 @@
+
+cond_{{condition_name}} : entity work.p2gt_doubleObjCond
+generic map(
+  {% if objects_first != objects_second %}
+  coll_correl     => DIFFERENT,
+  {%- else %}
+  coll_correl     => SAME12,
+  {%- endif %}
+  {% for key, value in cuts.items() +%}
+  {% if value.hwcut[0] is sameas true or value is sameas false %}
+  {{key}}         => {{value.hwcut | replace("[","(") | replace("]",")")| lower }}   {% if not loop.last %},{% endif %} --Physical value: {{value.physcut}}
+
+  {%- else %}
+  {{key}}         => {{value.hwcut | replace("[","(") | replace("]",")")}}, -- Physical value: {{value.physcut}}
+  {{key}}_enabled => {{value.enablecut | replace("[","(") | replace("]",")")| lower }}  {% if not loop.last %},{% endif %}
+
+  {%- endif %}
+  {%- endfor +%}
+)
+port map(
+  clk_algo      => clk_algo,
+  rst_algo      => rst_algo,
+  objects_valid => objects_valid,
+  object1       => objects({{objects_first}}),
+  {% if objects_first != objects_second %}
+  object2       => objects({{objects_second}}),
+  {% endif %}
+  algo_bit_out  => {{algo_bit_name}} 
+);
+
+

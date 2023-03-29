@@ -1,0 +1,16 @@
+
+cond_{{condition_name}} : entity work.p2gt_singleObjCond
+generic map(
+    {%- for key, value in cuts.items() +%}
+    {{key}}         => {{value.hwcut| replace("[","(") | replace("]",")")}}, -- Physical value: {{value.physcut}}
+    {{key}}_enabled => true{% if not loop.last %},{% endif %}
+    {%+ endfor +%}
+)
+port map(
+  clk_algo     => clk_algo,
+  rst_algo     => rst_algo,
+  object_valid => objects_valid,
+  object       => objects({{object}}),
+  algo_bit_out => {{algo_bit_name}} --this is a temporary solution, name is taken from patternfilewriter in config file
+);
+

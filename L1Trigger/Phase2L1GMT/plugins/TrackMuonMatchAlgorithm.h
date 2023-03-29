@@ -131,9 +131,9 @@ namespace Phase2L1GMT {
 
         bstart = 0;
         bstart = wordconcat<wordtype>(word2, bstart, mu.hwCharge(), 1);
-        bstart = wordconcat<wordtype>(word2, bstart, mu.hwQual(), BITSGTQUALITY);
+        bstart = wordconcat<wordtype>(word2, bstart, mu.hwQual(), BITSGTQUAL);
         bstart = wordconcat<wordtype>(word2, bstart, mu.hwIso(), BITSGTISO);
-        bstart = wordconcat<wordtype>(word2, bstart, mu.hwBeta(), BITSMUONBETA);
+        bstart = wordconcat<wordtype>(word2, bstart, mu.hwBeta(), BITSGTBETA);
 
         std::array<uint64_t, 2> wordout = {{word1, word2}};
         mu.setWord(wordout);

@@ -225,6 +225,9 @@ def _appendPhase2Digis(obj):
         'keep *_l1tTkStubsGmt_*_*',
         'keep *_l1tTkMuonsGmt_*_*',
         'keep *_l1tSAMuonsGmt_*_*',
+        'keep *_l1tGTProducer_*_*',
+        'keep l1tP2GTCandidatesl1tP2GTCandidatel1tP2GTCandidatesl1tP2GTCandidateedmrefhelperFindUsingAdvanceedmRefs_*_*_*',
+        'keep *_TriggerResults_*_*'
         ]
     obj.outputCommands += l1Phase2Digis
 

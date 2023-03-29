@@ -218,12 +218,17 @@ _phase2_siml1emulator.add(l1tMETPFProducer)
 from L1Trigger.Phase2L1ParticleFlow.L1NNTauProducer_cff import *
 _phase2_siml1emulator.add(l1tNNTauProducerPuppi)
 
-
 # BJets
 # ########################################################################
 from L1Trigger.Phase2L1ParticleFlow.L1BJetProducer_cff import *
 _phase2_siml1emulator.add(L1TBJetsTask)
 
+# Global Trigger
+from L1Trigger.Phase2L1GT.l1tGTProducer_cff import *
+_phase2_siml1emulator.add(l1tGTProducer)
+
+from L1Trigger.Phase2L1GT.l1tGTAlgoBlockProducer_cff import *
+_phase2_siml1emulator.add(l1tGTAlgoBlockProducer)
 
 # --> add modules
 from Configuration.Eras.Modifier_phase2_trigger_cff import phase2_trigger

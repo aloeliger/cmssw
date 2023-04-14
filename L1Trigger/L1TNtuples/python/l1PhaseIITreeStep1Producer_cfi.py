@@ -4,7 +4,6 @@ process_name = "L1"
 #process_name = "HLT"
 
 l1PhaseIITree = cms.EDAnalyzer("L1PhaseIITreeStep1Producer",
-
    egTokenBarrel = cms.InputTag("l1tEGammaClusterEmuProducer","",process_name),  #keep as is, not produced by GCT
    tkEGTokenBarrel = cms.InputTag("l1tLayer1EG","L1TkEleEB",process_name),
    tkEMTokenBarrel = cms.InputTag("l1tLayer1EG","L1TkEmEB",process_name),

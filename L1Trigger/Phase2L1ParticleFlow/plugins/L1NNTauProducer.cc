@@ -270,7 +270,6 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   L1TauEmu::etaphi_t phi = etaphi_t(seed.phi() * L1TauEmu::etaphi_base);
   math::PtEtaPhiMLorentzVector tempP4(
       float(pt), float(eta) / L1TauEmu::etaphi_base, float(phi) / L1TauEmu::etaphi_base, float(mass));
-
   //Make
   l1t::PFTau l1PFTau(tempP4, pNNVec, NN, 0, lId);
   l1PFTau.setZ0(float(z0) * 0.05);    //L1TauEmu::z0_base);
@@ -279,8 +278,8 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   //Firmware Tau
   l1ct::Tau l1ctTau;
   l1ctTau.hwPt = l1ct::pt_t(pt);  //l1gt is <16,11> and currently <16,14>
- l1ctTau.hwEta = l1ct::Scales::makeGlbEta(float(eta));
- l1ctTau.hwPhi = l1ct::Scales::makeGlbPhi(float(phi));
+  l1ctTau.hwEta = l1ct::Scales::makeGlbEta(float(eta));
+  l1ctTau.hwPhi = l1ct::Scales::makeGlbPhi(float(phi));
 
   l1ctTau.hwSeedPt = seed.pt();
   l1ctTau.hwSeedZ0 = seed.hwZ0();

@@ -270,7 +270,6 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   L1TauEmu::etaphi_t phi = etaphi_t(seed.phi() * L1TauEmu::etaphi_base);
   math::PtEtaPhiMLorentzVector tempP4(
       float(pt), float(eta) / L1TauEmu::etaphi_base, float(phi) / L1TauEmu::etaphi_base, float(mass));
-
   //Make
   l1t::PFTau l1PFTau(tempP4, pNNVec, NN, 0, lId);
   l1PFTau.setZ0(float(z0) * 0.05);    //L1TauEmu::z0_base);

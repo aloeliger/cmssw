@@ -5,6 +5,11 @@
 #include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
 #include "DataFormats/L1TParticleFlow/interface/PFCandidate.h"
 
+struct TauNNTFCache {
+  TauNNTFCache() : graphDef(nullptr) {}
+  std::atomic<tensorflow::GraphDef *> graphDef;
+};
+
 class TauNNId {
 public:
   TauNNId(const std::string &iInput,

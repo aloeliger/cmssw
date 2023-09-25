@@ -3,6 +3,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/Exception.h"
 #include "DataFormats/L1Trigger/interface/P2GTCandidate.h"
 
 #include "L1Trigger/Phase2L1GT/interface/L1GTScales.h"
@@ -11,6 +12,7 @@
 
 #include <functional>
 #include <optional>
+#include <cstdint>
 
 namespace l1t {
 
@@ -59,40 +61,20 @@ namespace l1t {
           maxAbsEta_(getOptionalParam<int, double>(
               "maxAbsEta", config, [&scales](double value) { return scales.to_hw_eta(value); })),
           maxIso_(getOptionalParam<int, double>(
-              "maxIso", config, [&scales](double value) { return scales.to_hw_isolation(value); })),
+              "maxIso", config, [&scales](double value) { return scales.to_hw_relative_isolation(value); })),
           minHwIso_(getOptionalParam<int>("minHwIso", config)),
           regionsAbsEtaLowerBounds_(getParamVector<int, double>(
               "regionsAbsEtaLowerBounds", config, [&scales](double value) { return scales.to_hw_eta(value); })),
           regionsMinPt_(getParamVector<int, double>(
               "regionsMinPt", config, [&scales](double value) { return scales.to_hw_pT(value); })),
           regionsMaxIso_(getParamVector<int, double>(
-              "regionsMaxIso", config, [&scales](double value) { return scales.to_hw_isolation(value); })),
-          regionsQual_(config.getParameter<std::vector<unsigned int>>("regionsQual")) {}
-
-    bool checkEtadependentcuts(const P2GTCandidate& obj) const {
-      bool res = true;
-
-      unsigned int index;
-      index = atIndex(obj.hwEta());
-      res &= regionsMinPt_.empty() ? true : obj.hwPT() > regionsMinPt_[index];
-      res &= regionsMaxIso_.empty()
-                 ? true
-                 : obj.hwIso().to_int() << scales_.isolation_shift() < regionsMaxIso_[index] * obj.hwPT().to_int();
-      res &= regionsQual_.empty() ? true : (obj.hwQual().to_uint() & regionsQual_[index]) == regionsQual_[index];
-      return res;
-    }
-
-    unsigned int atIndex(int objeta) const {
-      // Function that checks at which index the eta of the object is
-      // If object abs(eta) < regionsAbsEtaLowerBounds_[0] the function returns the last index,
-      // Might be undesired behaviour
-      for (unsigned int i = 0; i < regionsAbsEtaLowerBounds_.size() - 1; i++) {
-        if (std::abs(objeta) >= regionsAbsEtaLowerBounds_[i] && std::abs(objeta) < regionsAbsEtaLowerBounds_[i + 1]) {
-          return i;
-        }
-      }
-      return regionsAbsEtaLowerBounds_.size() - 1;
-    }
+              "regionsMaxIso", config, [&scales](double value) { return scales.to_hw_relative_isolation(value); })),
+          regionsQual_(config.getParameter<std::vector<unsigned int>>("regionsQual")),
+          minPrimVertDz_(getOptionalParam<int, double>(
+              "minPrimVertDz", config, [&scales](double value) { return scales.to_hw_z0(value); })),
+          maxPrimVertDz_(getOptionalParam<int, double>(
+              "maxPrimVertDz", config, [&scales](double value) { return scales.to_hw_z0(value); })),
+          primVertex_(getOptionalParam<unsigned int>("primVertex", config)) {}
 
     bool checkObject(const P2GTCandidate& obj) const {
       bool result = true;
@@ -116,12 +98,35 @@ namespace l1t {
       result &= maxScalarSumPt_ ? (obj.hwSca_sum() < minScalarSumPt_) : true;
 
       result &= qual_.empty() ? true : std::find(qual_.begin(), qual_.end(), obj.hwQual().to_uint()) != qual_.end();
-      result &=
-          maxIso_ ? obj.hwIso().to_int() << scales_.isolation_shift() < maxIso_.value() * obj.hwPT().to_int() : true;
+      result &= maxIso_ ? obj.hwIso().to_int64() << scales_.isolation_shift() <
+                              static_cast<int64_t>(maxIso_.value()) * obj.hwPT().to_int64()
+                        : true;
 
       result &= minHwIso_ ? (obj.hwIso() > minHwIso_) : true;
-      result &= regionsAbsEtaLowerBounds_.empty() ? true : checkEtadependentcuts(obj);
+      result &= regionsAbsEtaLowerBounds_.empty() ? true : checkEtaDependentCuts(obj);
       return result;
+    }
+
+    bool checkPrimaryVertices(const P2GTCandidate& obj, const P2GTCandidateCollection& primVertCol) const {
+      if (!minPrimVertDz_ && !maxPrimVertDz_) {
+        return true;
+      } else {
+        if (!primVertex_) {
+          throw cms::Exception("Configuration")
+              << "When a min/max primary vertex cut is set the primary vertex to cut\n"
+              << "on has to be specified with with config parameter \'primVertex\'. ";
+        }
+        if (primVertex_ < primVertCol.size()) {
+          uint32_t dZ = abs(obj.hwZ0() - primVertCol[primVertex_.value()].hwZ0());
+
+          bool result = true;
+          result &= minPrimVertDz_ ? dZ > minPrimVertDz_ : true;
+          result &= maxPrimVertDz_ ? dZ < maxPrimVertDz_ : true;
+          return result;
+        } else {
+          return false;
+        }
+      }
     }
 
     static void fillPSetDescription(edm::ParameterSetDescription& desc) {
@@ -145,9 +150,38 @@ namespace l1t {
       desc.add<std::vector<double>>("regionsMinPt", {});
       desc.add<std::vector<double>>("regionsMaxIso", {});
       desc.add<std::vector<unsigned int>>("regionsQual", {});
+      desc.addOptional<double>("minPrimVertDz");
+      desc.addOptional<double>("maxPrimVertDz");
+      desc.addOptional<unsigned int>("primVertex");
     }
 
     const edm::InputTag& tag() const { return tag_; }
+
+  private:
+    bool checkEtaDependentCuts(const P2GTCandidate& obj) const {
+      bool res = true;
+
+      unsigned int index;
+      index = atIndex(obj.hwEta());
+      res &= regionsMinPt_.empty() ? true : obj.hwPT() > regionsMinPt_[index];
+      res &= regionsMaxIso_.empty() ? true
+                                    : obj.hwIso().to_int64() << scales_.isolation_shift() <
+                                          static_cast<int64_t>(regionsMaxIso_[index]) * obj.hwPT().to_int64();
+      res &= regionsQual_.empty() ? true : (obj.hwQual().to_uint() & regionsQual_[index]) == regionsQual_[index];
+      return res;
+    }
+
+    unsigned int atIndex(int objeta) const {
+      // Function that checks at which index the eta of the object is
+      // If object abs(eta) < regionsAbsEtaLowerBounds_[0] the function returns the last index,
+      // Might be undesired behaviour
+      for (unsigned int i = 0; i < regionsAbsEtaLowerBounds_.size() - 1; i++) {
+        if (std::abs(objeta) >= regionsAbsEtaLowerBounds_[i] && std::abs(objeta) < regionsAbsEtaLowerBounds_[i + 1]) {
+          return i;
+        }
+      }
+      return regionsAbsEtaLowerBounds_.size() - 1;
+    }
 
   private:
     const L1GTScales scales_;
@@ -171,6 +205,9 @@ namespace l1t {
     const std::vector<int> regionsMinPt_;
     const std::vector<int> regionsMaxIso_;
     const std::vector<unsigned int> regionsQual_;
+    const std::optional<int> minPrimVertDz_;
+    const std::optional<int> maxPrimVertDz_;
+    const std::optional<unsigned int> primVertex_;
   };
 
 }  // namespace l1t

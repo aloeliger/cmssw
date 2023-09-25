@@ -89,7 +89,7 @@ namespace l1t {
         .def("to_hw_phi", &L1GTScales::to_hw_phi)
         .def("to_hw_eta", &L1GTScales::to_hw_eta)
         .def("to_hw_z0", &L1GTScales::to_hw_z0)
-        .def("to_hw_isolation", &L1GTScales::to_hw_isolation)
+        .def("to_hw_relative_isolation", &L1GTScales::to_hw_relative_isolation)
         .def("isolation_shift", &L1GTScales::isolation_shift)
         .def("to_hw_beta", &L1GTScales::to_hw_beta)
         .def("to_hw_mass", &L1GTScales::to_hw_mass)
@@ -101,6 +101,7 @@ namespace l1t {
         .def("to_hw_InvMassSqrDiv2", &L1GTScales::to_hw_InvMassSqrDiv2)
         .def("to_hw_TransMassSqrDiv2", &L1GTScales::to_hw_TransMassSqrDiv2)
         .def("to_hw_PtSquared", &L1GTScales::to_hw_PtSquared)
+        .def("to_hw_InvMassSqrOver2DR", &L1GTScales::to_hw_InvMassSqrOver2DR)
         .def("neg_chg", &L1GTScales::neg_chg)
         .def("pos_chg", &L1GTScales::pos_chg);
   }

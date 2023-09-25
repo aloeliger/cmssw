@@ -16,7 +16,6 @@
 
 
   <class name="l1t::P2GTCandidate::Optional<int>"/>
-  <class name="l1t::P2GTCandidate::Optional<double>"/>
   <class name="l1t::P2GTCandidate"/>
   <class name="l1t::P2GTCandidateCollection"/>
   <class name="edm::Wrapper<l1t::P2GTCandidateCollection>"/>

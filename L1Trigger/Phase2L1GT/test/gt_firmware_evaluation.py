@@ -9,7 +9,7 @@ process.load('Configuration.StandardSequences.Services_cff')
 
 # Input source
 process.source = cms.Source("EmptySource")
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(72))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(94))
 
 options = VarParsing.VarParsing()
 options.register ("platform",
@@ -816,7 +816,39 @@ process.BoardData = cms.EDAnalyzer("L1GTBoardWriter",
   channels = channels
 )
 
+process.BoardDataObjects = cms.EDAnalyzer("L1GTOutputObjectWriter",
+  GCTNonIsoEg = cms.InputTag("l1tGTProducer", "GCTNonIsoEg"),
+  GCTIsoEg = cms.InputTag("l1tGTProducer", "GCTIsoEg"),
+  GCTJets = cms.InputTag("l1tGTProducer", "GCTJets"),
+  GCTTaus = cms.InputTag("l1tGTProducer", "GCTTaus"),
+  GCTHtSum = cms.InputTag("l1tGTProducer", "GCTHtSum"),
+  GCTEtSum = cms.InputTag("l1tGTProducer", "GCTEtSum"),
+  GMTSaPromptMuons = cms.InputTag("l1tGTProducer", "GMTSaPromptMuons"),
+  GMTSaDisplacedMuons = cms.InputTag("l1tGTProducer", "GMTSaDisplacedMuons"),
+  GMTTkMuons = cms.InputTag("l1tGTProducer", "GMTTkMuons"),
+  GMTTopo = cms.InputTag("l1tGTProducer", "GMTTopo"),
+  GTTPromptJets = cms.InputTag("l1tGTProducer", "GTTPromptJets"),
+  GTTDisplacedJets = cms.InputTag("l1tGTProducer", "GTTDisplacedJets"),
+  GTTPhiCandidates = cms.InputTag("l1tGTProducer", "GTTPhiCandidates"),
+  GTTRhoCandidates = cms.InputTag("l1tGTProducer", "GTTRhoCandidates"),
+  GTTBsCandidates = cms.InputTag("l1tGTProducer", "GTTBsCandidates"),
+  GTTHadronicTaus = cms.InputTag("l1tGTProducer", "GTTHadronicTaus"),
+  GTTPrimaryVert = cms.InputTag("l1tGTProducer", "GTTPrimaryVert"),
+  GTTPromptHtSum = cms.InputTag("l1tGTProducer", "GTTPromptHtSum"),
+  GTTDisplacedHtSum = cms.InputTag("l1tGTProducer", "GTTDisplacedHtSum"),
+  GTTEtSum = cms.InputTag("l1tGTProducer", "GTTEtSum"),
+  CL2Jets = cms.InputTag("l1tGTProducer", "CL2Jets"),
+  CL2Taus = cms.InputTag("l1tGTProducer", "CL2Taus"),
+  CL2Electrons = cms.InputTag("l1tGTProducer", "CL2Electrons"),
+  CL2Photons = cms.InputTag("l1tGTProducer", "CL2Photons"),
+  CL2HtSum = cms.InputTag("l1tGTProducer", "CL2HtSum"),
+  CL2EtSum = cms.InputTag("l1tGTProducer", "CL2EtSum"),
+  outputFilename = cms.string("outputObjectsPattern"),
+  maxLines = cms.uint32(1024)
+)
+
 process.l1t_BoardData = cms.EndPath(process.BoardData)
+process.l1t_BoardDataObjects = cms.EndPath(process.BoardDataObjects)
 
 process.output = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('file:test_output.root'),

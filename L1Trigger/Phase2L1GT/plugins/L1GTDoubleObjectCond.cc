@@ -50,6 +50,7 @@ private:
 
   const edm::EDGetTokenT<P2GTCandidateCollection> token1_;
   const edm::EDGetTokenT<P2GTCandidateCollection> token2_;
+  const edm::EDGetTokenT<P2GTCandidateCollection> primVertToken_;
 };
 
 L1GTDoubleObjectCond::L1GTDoubleObjectCond(const edm::ParameterSet& config)
@@ -62,7 +63,8 @@ L1GTDoubleObjectCond::L1GTDoubleObjectCond(const edm::ParameterSet& config)
       token1_(consumes<P2GTCandidateCollection>(collection1Cuts_.tag())),
       token2_(collection1Cuts_.tag() == collection2Cuts_.tag()
                   ? token1_
-                  : consumes<P2GTCandidateCollection>(collection2Cuts_.tag())) {
+                  : consumes<P2GTCandidateCollection>(collection2Cuts_.tag())),
+      primVertToken_(consumes<P2GTCandidateCollection>(config.getParameter<edm::InputTag>("primVertTag"))) {
   produces<P2GTCandidateVectorRef>(collection1Cuts_.tag().instance());
 
   if (!(collection1Cuts_.tag() == collection2Cuts_.tag())) {
@@ -85,6 +87,8 @@ void L1GTDoubleObjectCond::fillDescriptions(edm::ConfigurationDescriptions& desc
   L1GTSingleCollectionCut::fillPSetDescription(collection2Desc);
   desc.add<edm::ParameterSetDescription>("collection2", collection2Desc);
 
+  desc.add<edm::InputTag>("primVertTag");
+
   desc.addUntracked<bool>("sanity_checks", false);
   desc.addUntracked<bool>("inv_mass_checks", false);
 
@@ -101,6 +105,7 @@ void L1GTDoubleObjectCond::fillDescriptions(edm::ConfigurationDescriptions& desc
 bool L1GTDoubleObjectCond::filter(edm::StreamID, edm::Event& event, const edm::EventSetup& setup) const {
   edm::Handle<P2GTCandidateCollection> col1 = event.getHandle(token1_);
   edm::Handle<P2GTCandidateCollection> col2 = event.getHandle(token2_);
+  edm::Handle<P2GTCandidateCollection> primVertCol = event.getHandle(primVertToken_);
 
   bool condition_result = false;
 
@@ -118,7 +123,9 @@ bool L1GTDoubleObjectCond::filter(edm::StreamID, edm::Event& event, const edm::E
 
       bool pass = true;
       pass &= collection1Cuts_.checkObject(col1->at(idx1));
+      pass &= collection1Cuts_.checkPrimaryVertices(col1->at(idx1), *primVertCol);
       pass &= collection2Cuts_.checkObject(col2->at(idx2));
+      pass &= collection2Cuts_.checkPrimaryVertices(col2->at(idx2), *primVertCol);
       pass &= deltaCuts_.checkObjects(col1->at(idx1), col2->at(idx2), massErrors);
 
       condition_result |= pass;

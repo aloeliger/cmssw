@@ -28,18 +28,6 @@ namespace l1t {
     return result;
   }
 
-  template <typename A, typename... Args>
-  A l1t_unpack_int(const A& packed, Args&&... args) {
-    A temp = packed;
-    (
-        [&temp](auto&& arg) {
-          arg = temp(arg.width - 1, 0);
-          temp >>= arg.width;
-        }(std::forward<Args>(args)),
-        ...);
-    return temp;
-  }
-
   struct L1TGT_BaseInterface {
     virtual std::size_t packed_width() const = 0;
     virtual P2GTCandidate to_GTObject() const = 0;
@@ -49,7 +37,6 @@ namespace l1t {
   template <std::size_t N>
   struct L1TGT_Interface : public L1TGT_BaseInterface {
     virtual ap_uint<N> pack() const = 0;
-    virtual ap_uint<N> unpack(const ap_uint<N>&) = 0;
 
     static constexpr std::size_t WIDTH = N;
 
@@ -70,7 +57,9 @@ namespace l1t {
 
     ap_uint<N> pack() const override { return pack_common(); }
 
-    ap_uint<N> unpack(const ap_uint<N>& packed) override { return l1t_unpack_int(packed, valid, pT, phi, eta); }
+    static L1TGT_Common3Vector from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_Common3Vector(1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwEta());
+    }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object;
@@ -82,8 +71,7 @@ namespace l1t {
     }
   };
 
-  template <std::size_t N>
-  struct L1TGT_CommonSum : public L1TGT_Interface<N> {
+  struct L1TGT_CommonSum : public L1TGT_Interface<64> {
     ap_uint<1> valid;
     ap_uint<16> pT;
     ap_int<13> phi;
@@ -94,10 +82,10 @@ namespace l1t {
 
     ap_uint<46> pack_common() const { return l1t_pack_int<ap_uint<46>>(valid, pT, phi, scalar_sum_pT); }
 
-    ap_uint<N> pack() const override { return pack_common(); }
+    ap_uint<64> pack() const override { return pack_common(); }
 
-    ap_uint<N> unpack(const ap_uint<N>& packed) override {
-      return l1t_unpack_int(packed, valid, pT, phi, scalar_sum_pT);
+    static L1TGT_CommonSum from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_CommonSum(1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwSca_sum());
     }
 
     P2GTCandidate to_GTObject() const override {
@@ -134,8 +122,8 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), seed_pT);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), seed_pT);
+    static L1TGT_GCT_tau6p6 from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GCT_tau6p6(1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwEta(), gtObject.hwSeed_pT());
     }
 
     P2GTCandidate to_GTObject() const override {
@@ -146,7 +134,7 @@ namespace l1t {
     }
   };
 
-  struct L1TGT_GCT_Sum2 : public L1TGT_CommonSum<64> {
+  struct L1TGT_GCT_Sum2 : public L1TGT_CommonSum {
     using L1TGT_CommonSum::L1TGT_CommonSum;
   };
 
@@ -166,13 +154,20 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), z0, d0, charge, qual);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), z0, d0, charge, qual);
+    static L1TGT_GMT_PromptDisplacedMuon from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GMT_PromptDisplacedMuon(1,
+                                           gtObject.hwPT(),
+                                           gtObject.hwPhi(),
+                                           gtObject.hwEta(),
+                                           gtObject.hwZ0() >> 12,
+                                           gtObject.hwD0() >> 5,
+                                           gtObject.hwCharge(),
+                                           gtObject.hwQual());
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object(L1TGT_Common3Vector::to_GTObject());
-      gt_object.setHwZ0(static_cast<int>(z0) << 5);
+      gt_object.setHwZ0(static_cast<int>(z0) << 12);
       gt_object.setHwD0(static_cast<int>(d0) << 5);
       gt_object.setHwCharge(charge);
       gt_object.setHwQual(qual);
@@ -205,13 +200,22 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), z0, d0, charge, qual, iso, beta);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), z0, d0, charge, qual, iso, beta);
+    static L1TGT_GMT_TrackMatchedmuon from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GMT_TrackMatchedmuon(1,
+                                        gtObject.hwPT(),
+                                        gtObject.hwPhi(),
+                                        gtObject.hwEta(),
+                                        gtObject.hwZ0() >> 7,
+                                        gtObject.hwD0() >> 2,
+                                        gtObject.hwCharge(),
+                                        gtObject.hwQual(),
+                                        gtObject.hwIso() >> 7,
+                                        gtObject.hwBeta());
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object(L1TGT_Common3Vector::to_GTObject());
-      gt_object.setHwZ0(z0);
+      gt_object.setHwZ0(static_cast<int>(z0) << 7);
       gt_object.setHwD0(static_cast<int>(d0) << 2);
       gt_object.setHwCharge(charge);
       gt_object.setHwQual(qual);
@@ -237,8 +241,9 @@ namespace l1t {
 
     ap_uint<WIDTH> pack() const override { return l1t_pack_int<ap_uint<WIDTH>>(valid, pT, eta, phi, mass, qual); }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(packed, valid, pT, eta, phi, mass, qual);
+    static L1TGT_GMT_TopoObject from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GMT_TopoObject(
+          1, gtObject.hwPT() / 5, gtObject.hwPhi() >> 5, gtObject.hwEta() >> 5, gtObject.hwMass(), gtObject.hwQual());
     }
 
     P2GTCandidate to_GTObject() const override {
@@ -267,13 +272,14 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), z0, number_of_tracks);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::unpack(packed), z0, number_of_tracks);
+    static L1TGT_GTT_PromptJet from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GTT_PromptJet(
+          1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwEta(), gtObject.hwZ0() >> 7, gtObject.hwNumber_of_tracks());
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object(L1TGT_Common3Vector::to_GTObject());
-      gt_object.setHwZ0(z0);
+      gt_object.setHwZ0(static_cast<int>(z0) << 7);
       gt_object.setHwNumber_of_tracks(number_of_tracks);
 
       return gt_object;
@@ -294,14 +300,19 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), z0, number_of_tracks, ap_uint<5>(0), d0);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int<ap_uint<WIDTH>>(
-          L1TGT_Common3Vector::unpack(packed), z0, number_of_tracks, ap_uint<5>(0), d0);
+    static L1TGT_GTT_DisplacedJet from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GTT_DisplacedJet(1,
+                                    gtObject.hwPT(),
+                                    gtObject.hwPhi(),
+                                    gtObject.hwEta(),
+                                    gtObject.hwZ0() >> 7,
+                                    gtObject.hwNumber_of_tracks(),
+                                    gtObject.hwD0());
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object(L1TGT_Common3Vector::to_GTObject());
-      gt_object.setHwZ0(z0);
+      gt_object.setHwZ0(static_cast<int>(z0) << 7);
       gt_object.setHwNumber_of_tracks(number_of_tracks);
       gt_object.setHwD0(d0);
 
@@ -309,7 +320,7 @@ namespace l1t {
     }
   };
 
-  struct L1TGT_GTT_Sum : public L1TGT_CommonSum<64> {
+  struct L1TGT_GTT_Sum : public L1TGT_CommonSum {
     using L1TGT_CommonSum::L1TGT_CommonSum;
   };
 
@@ -333,8 +344,15 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), seed_pT, seed_z0, charge, type);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), seed_pT, seed_z0, charge, type);
+    static L1TGT_GTT_HadronicTau from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GTT_HadronicTau(1,
+                                   gtObject.hwPT(),
+                                   gtObject.hwPhi(),
+                                   gtObject.hwEta(),
+                                   gtObject.hwSeed_pT(),
+                                   gtObject.hwSeed_z0(),
+                                   gtObject.hwCharge(),
+                                   gtObject.hwType());
     }
 
     P2GTCandidate to_GTObject() const override {
@@ -361,13 +379,13 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), z0);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), z0);
+    static L1TGT_GTT_LightMeson from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GTT_LightMeson(1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwEta(), gtObject.hwZ0() >> 7);
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object(L1TGT_Common3Vector::to_GTObject());
-      gt_object.setHwZ0(z0);
+      gt_object.setHwZ0(static_cast<int>(z0) << 7);
 
       return gt_object;
     }
@@ -397,16 +415,21 @@ namespace l1t {
 
     ap_uint<WIDTH> pack() const override {
       return l1t_pack_int<ap_uint<WIDTH>>(
-          valid, z0 /*, number_of_tracks_in_pv, sum_pT_pv, qual, number_of_tracks_not_in_pv */);  // TODO: Maybe later
+          valid, z0, number_of_tracks_in_pv, sum_pT_pv, qual, number_of_tracks_not_in_pv);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(packed, valid, z0, number_of_tracks_in_pv, sum_pT_pv, qual, number_of_tracks_not_in_pv);
+    static L1TGT_GTT_PrimaryVert from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_GTT_PrimaryVert(1,
+                                   gtObject.hwZ0() / 5,
+                                   gtObject.hwNumber_of_tracks_in_pv(),
+                                   gtObject.hwSum_pT_pv(),
+                                   gtObject.hwQual(),
+                                   gtObject.hwNumber_of_tracks_not_in_pv());
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object;
-      gt_object.setHwZ0(z0);
+      gt_object.setHwZ0(static_cast<int>(z0) * 5);
       gt_object.setHwNumber_of_tracks_in_pv(number_of_tracks_in_pv);
       gt_object.setHwSum_pT_pv(sum_pT_pv);
       gt_object.setHwQual(qual);
@@ -428,19 +451,19 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), z0);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), z0);
+    static L1TGT_CL2_Jet from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_CL2_Jet(1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwEta(), gtObject.hwZ0() >> 7);
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object(L1TGT_Common3Vector::to_GTObject());
-      gt_object.setHwZ0(z0);
+      gt_object.setHwZ0(static_cast<int>(z0) << 7);
 
       return gt_object;
     }
   };
 
-  struct L1TGT_CL2_Sum : public L1TGT_CommonSum<64> {
+  struct L1TGT_CL2_Sum : public L1TGT_CommonSum {
     using L1TGT_CommonSum::L1TGT_CommonSum;
   };
 
@@ -467,8 +490,15 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), seed_pT, seed_z0, charge, type);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), seed_pT, seed_z0, charge, type);
+    static L1TGT_CL2_Tau from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_CL2_Tau(1,
+                           gtObject.hwPT(),
+                           gtObject.hwPhi(),
+                           gtObject.hwEta(),
+                           gtObject.hwSeed_pT(),
+                           gtObject.hwSeed_z0(),
+                           gtObject.hwCharge(),
+                           gtObject.hwType());
     }
 
     P2GTCandidate to_GTObject() const override {
@@ -496,8 +526,15 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), qual, iso, charge, z0);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), qual, iso, charge, z0);
+    static L1TGT_CL2_Electron from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_CL2_Electron(1,
+                                gtObject.hwPT(),
+                                gtObject.hwPhi(),
+                                gtObject.hwEta(),
+                                gtObject.hwQual(),
+                                gtObject.hwIso(),
+                                gtObject.hwCharge(),
+                                gtObject.hwZ0() >> 7);
     }
 
     P2GTCandidate to_GTObject() const override {
@@ -505,7 +542,7 @@ namespace l1t {
       gt_object.setHwQual(qual);
       gt_object.setHwIso(iso);
       gt_object.setHwCharge(charge);
-      gt_object.setHwZ0(z0);
+      gt_object.setHwZ0(static_cast<int>(z0) << 7);
 
       return gt_object;
     }
@@ -522,8 +559,9 @@ namespace l1t {
       return l1t_pack_int<ap_uint<WIDTH>>(L1TGT_Common3Vector::pack_common(), qual, iso);
     }
 
-    ap_uint<WIDTH> unpack(const ap_uint<WIDTH>& packed) override {
-      return l1t_unpack_int(L1TGT_Common3Vector::unpack(packed), qual, iso);
+    static L1TGT_CL2_Photon from_GTObject(const P2GTCandidate& gtObject) {
+      return L1TGT_CL2_Photon(
+          1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwEta(), gtObject.hwQual(), gtObject.hwIso());
     }
 
     P2GTCandidate to_GTObject() const override {

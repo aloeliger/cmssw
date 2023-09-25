@@ -11,6 +11,10 @@ namespace l1t {
     static constexpr int RELATIVE_ISOLATION_RESOLUTION = 10;  // Resolution = 1/2^RELATIVE_ISOLATION_RESOLUTION
 
   public:
+    /* INV_MASS_SQR_OVER_2_DR_SQR_RESOLUTION originates from a simple analysis that yielded that the smallest
+       delta in hardware values of M^2/(2 dR^2) = 2.93326e-06 => log2(2.93326e-06) = -18.38 */
+    static constexpr int INV_MASS_SQR_OVER_2_DR_SQR_RESOLUTION = 19;
+
     L1GTScales(double pT_lsb,
                double phi_lsb,
                double eta_lsb,
@@ -35,7 +39,7 @@ namespace l1t {
     int to_hw_eta(double value) const { return std::round(value / eta_lsb_); };
     int to_hw_z0(double value) const { return std::round(value / z0_lsb_); };
     // int to_hw_d0(double value) const { return std::round(value / d0_lsb_); };
-    int to_hw_isolation(double value) const {
+    int to_hw_relative_isolation(double value) const {
       return std::round(pT_lsb_ * value * std::pow(2, isolation_shift_) / isolation_lsb_);
     }
     int to_hw_beta(double value) const { return std::round(value / beta_lsb_); };
@@ -51,6 +55,10 @@ namespace l1t {
     double to_hw_TransMassSqrDiv2(double value) const { return value * value / (2 * pT_lsb_ * pT_lsb_); }
 
     double to_hw_PtSquared(double value) const { return value * value / (pT_lsb_ * pT_lsb_); }
+    double to_hw_InvMassSqrOver2DR(double value) const {
+      return value * value * eta_lsb_ * eta_lsb_ * std::pow(2, INV_MASS_SQR_OVER_2_DR_SQR_RESOLUTION) /
+             (2 * pT_lsb_ * pT_lsb_);
+    }
 
     double to_pT(int value) const { return value * pT_lsb_; };
     double to_phi(int value) const { return value * phi_lsb_; };

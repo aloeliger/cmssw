@@ -14,6 +14,7 @@
 #include "L1Trigger/Phase2L1GT/interface/L1GTScales.h"
 #include "L1GTSingleCollectionCut.h"
 #include "L1GTDeltaCut.h"
+#include "L1GTMultiBodyCut.h"
 #include "L1GTSingleInOutLUT.h"
 
 #include <set>
@@ -45,9 +46,12 @@ private:
   const L1GTDeltaCut delta13Cuts_;
   const L1GTDeltaCut delta23Cuts_;
 
+  const L1GTMultiBodyCut delta123Cuts_;
+
   const edm::EDGetTokenT<P2GTCandidateCollection> token1_;
   const edm::EDGetTokenT<P2GTCandidateCollection> token2_;
   const edm::EDGetTokenT<P2GTCandidateCollection> token3_;
+  const edm::EDGetTokenT<P2GTCandidateCollection> primVertToken_;
 };
 
 L1GTTripleObjectCond::L1GTTripleObjectCond(const edm::ParameterSet& config)
@@ -63,6 +67,7 @@ L1GTTripleObjectCond::L1GTTripleObjectCond(const edm::ParameterSet& config)
           config.getParameter<edm::ParameterSet>("delta13"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
       delta23Cuts_(
           config.getParameter<edm::ParameterSet>("delta23"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
+      delta123Cuts_(config, config, scales_, inv_mass_checks_),
       token1_(consumes<P2GTCandidateCollection>(collection1Cuts_.tag())),
       token2_(collection1Cuts_.tag() == collection2Cuts_.tag()
                   ? token1_
@@ -71,7 +76,8 @@ L1GTTripleObjectCond::L1GTTripleObjectCond(const edm::ParameterSet& config)
                   ? token1_
                   : (collection2Cuts_.tag() == collection3Cuts_.tag()
                          ? token2_
-                         : consumes<P2GTCandidateCollection>(collection3Cuts_.tag()))) {
+                         : consumes<P2GTCandidateCollection>(collection3Cuts_.tag()))),
+      primVertToken_(consumes<P2GTCandidateCollection>(config.getParameter<edm::InputTag>("primVertTag"))) {
   produces<P2GTCandidateVectorRef>(collection1Cuts_.tag().instance());
 
   if (!(collection1Cuts_.tag() == collection2Cuts_.tag())) {
@@ -106,6 +112,8 @@ void L1GTTripleObjectCond::fillDescriptions(edm::ConfigurationDescriptions& desc
   L1GTScales::fillPSetDescription(scalesDesc);
   desc.add<edm::ParameterSetDescription>("scales", scalesDesc);
 
+  desc.add<edm::InputTag>("primVertTag");
+
   desc.addUntracked<bool>("sanity_checks", false);
   desc.addUntracked<bool>("inv_mass_checks", false);
 
@@ -121,6 +129,8 @@ void L1GTTripleObjectCond::fillDescriptions(edm::ConfigurationDescriptions& desc
   L1GTDeltaCut::fillPSetDescription(delta23Desc);
   desc.add<edm::ParameterSetDescription>("delta23", delta23Desc);
 
+  L1GTMultiBodyCut::fillPSetDescription(desc);
+
   L1GTDeltaCut::fillLUTDescriptions(desc);
 
   descriptions.addWithDefaultLabel(desc);
@@ -130,6 +140,7 @@ bool L1GTTripleObjectCond::filter(edm::StreamID, edm::Event& event, const edm::E
   edm::Handle<P2GTCandidateCollection> col1 = event.getHandle(token1_);
   edm::Handle<P2GTCandidateCollection> col2 = event.getHandle(token2_);
   edm::Handle<P2GTCandidateCollection> col3 = event.getHandle(token3_);
+  edm::Handle<P2GTCandidateCollection> primVertCol = event.getHandle(primVertToken_);
 
   bool condition_result = false;
 
@@ -157,11 +168,15 @@ bool L1GTTripleObjectCond::filter(edm::StreamID, edm::Event& event, const edm::E
 
         bool pass = true;
         pass &= collection1Cuts_.checkObject(col1->at(idx1));
+        pass &= collection1Cuts_.checkPrimaryVertices(col1->at(idx1), *primVertCol);
         pass &= collection2Cuts_.checkObject(col2->at(idx2));
+        pass &= collection2Cuts_.checkPrimaryVertices(col2->at(idx2), *primVertCol);
         pass &= collection3Cuts_.checkObject(col3->at(idx3));
+        pass &= collection3Cuts_.checkPrimaryVertices(col3->at(idx3), *primVertCol);
         pass &= delta12Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), massErrors);
         pass &= delta13Cuts_.checkObjects(col1->at(idx1), col3->at(idx3), massErrors);
         pass &= delta23Cuts_.checkObjects(col2->at(idx2), col3->at(idx3), massErrors);
+        pass &= delta123Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), col3->at(idx3), massErrors);
 
         condition_result |= pass;
 

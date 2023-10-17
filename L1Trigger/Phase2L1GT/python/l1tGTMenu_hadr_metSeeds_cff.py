@@ -50,15 +50,15 @@ algorithms.append(cms.PSet(expression = cms.string("pDoublePuppiJet112_112")))
 DoublePuppiJet16035Mass620 = l1tGTDoubleObjectCond.clone(
     collection1 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2Jets"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
+        minEta = cms.double(-5),
+        maxEta = cms.double(5),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
         regionsMinPt=cms.vdouble(107,74)
     ),
     collection2 = cms.PSet(
         tag = cms.InputTag("l1tGTProducer", "CL2Jets"),
-        minEta = cms.double(-2.4),
-        maxEta = cms.double(2.4),
+        minEta = cms.double(-5),
+        maxEta = cms.double(5),
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
         regionsMinPt=cms.vdouble(25,25) #safety cut, in truth 11 and 13 GeV
     ),

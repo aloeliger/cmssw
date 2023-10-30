@@ -15,8 +15,8 @@ scale_parameter = cms.PSet(
     seed_z0_lsb=cms.double(30. / 2**9),    # ? cm
     sca_sum_lsb=cms.double(0.03125),       # GeV
     sum_pT_pv_lsb=cms.double(0.25),        # GeV
-    pos_chg=cms.int32(1),
-    neg_chg=cms.int32(0)
+    pos_chg=cms.int32(0),
+    neg_chg=cms.int32(1)
 )
 
 l1tGTScales = CppScales(*[param.value() for param in scale_parameter.parameters_().values()])

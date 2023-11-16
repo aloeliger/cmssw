@@ -809,7 +809,7 @@ else:
     channels = cms.vuint32(32, 33)
 
 
-process.BoardData = cms.EDAnalyzer("L1GTBoardWriter",
+process.BoardData = cms.EDAnalyzer("L1GTAlgoBoardWriter",
   outputFilename = cms.string("outputPattern"),
   algoBlocksTag = cms.InputTag("l1tGTAlgoBlockProducer"),
   maxLines = cms.uint32(1024),
@@ -847,8 +847,19 @@ process.BoardDataObjects = cms.EDAnalyzer("L1GTOutputObjectWriter",
   maxLines = cms.uint32(1024)
 )
 
+process.FinOrBoardData = cms.EDAnalyzer("L1GTFinOrBoardWriter",
+  outputFilename = cms.string("outputFinOrPattern"),
+  algoBlocksTag = cms.InputTag("l1tGTAlgoBlockProducer"),
+  maxLines = cms.uint32(1024),
+  channelsLow = cms.vuint32(4, 5, 6),
+  channelsMid = cms.vuint32(40, 41, 42),
+  channelsHigh = cms.vuint32(52, 53, 54),
+  channelFinOr = cms.uint32(99)
+)
+
 process.l1t_BoardData = cms.EndPath(process.BoardData)
 process.l1t_BoardDataObjects = cms.EndPath(process.BoardDataObjects)
+process.l1t_FinOrBoardData = cms.EndPath(process.FinOrBoardData)
 
 process.output = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('file:test_output.root'),

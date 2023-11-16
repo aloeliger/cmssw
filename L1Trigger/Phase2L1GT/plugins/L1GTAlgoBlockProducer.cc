@@ -8,7 +8,7 @@
 #include "DataFormats/Common/interface/View.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
@@ -34,6 +34,7 @@
 #include <memory>
 #include <utility>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <set>
 #include <tuple>
@@ -311,32 +312,48 @@ namespace pathStatusExpression {
 
 using namespace l1t;
 
-class L1GTAlgoBlockProducer : public edm::stream::EDProducer<> {
+class L1GTAlgoBlockProducer
+    : public edm::one::EDProducer<edm::RunCache<std::unordered_map<std::string, unsigned int>>> {
 public:
   explicit L1GTAlgoBlockProducer(const edm::ParameterSet&);
   ~L1GTAlgoBlockProducer() override = default;
 
   static void fillDescriptions(edm::ConfigurationDescriptions&);
 
-  void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) override;
-
 private:
   struct AlgoDefinition {
     edm::propagate_const<std::unique_ptr<pathStatusExpression::Evaluator>> evaluator_;
     std::vector<std::string> pathNames_;
     std::set<std::tuple<std::string, std::string>> filtModules_;
+    unsigned int prescale_;
+    unsigned int prescalePreview_;
+    std::set<unsigned int> bunchMask_;
+    bool isVeto_;
+    int triggerTypes_;
   };
 
+  void init(const edm::ProcessHistory&);
   void produce(edm::Event&, const edm::EventSetup&) override;
+  std::shared_ptr<std::unordered_map<std::string, unsigned int>> globalBeginRun(edm::Run const&,
+                                                                                edm::EventSetup const&) const override;
+
+  void globalEndRun(edm::Run const&, edm::EventSetup const&) {}
 
   edm::GetterOfProducts<P2GTCandidateVectorRef> getterOfPassedReferences_;
   std::map<std::string, AlgoDefinition> algoDefinitions_;
+  bool initialized = false;
 };
 
 void L1GTAlgoBlockProducer::fillDescriptions(edm::ConfigurationDescriptions& description) {
   edm::ParameterSetDescription algoDesc;
   algoDesc.add<std::string>("name", "");
   algoDesc.add<std::string>("expression");
+  algoDesc.add<double>("prescale", 1);
+  algoDesc.add<double>("prescalePreview", 1);
+  algoDesc.add<std::vector<unsigned int>>("bunchMask", {});
+
+  algoDesc.add<std::vector<int>>("triggerTypes", {1});
+  algoDesc.add<bool>("veto", false);
 
   edm::ParameterSetDescription desc;
   desc.addVPSet("algorithms", algoDesc);
@@ -385,6 +402,34 @@ L1GTAlgoBlockProducer::L1GTAlgoBlockProducer(const edm::ParameterSet& config)
     }
 
     definition.evaluator_ = shuntingYardAlgorithm.finish();
+    double dPrescale = algoConfig.getParameter<double>("prescale");
+    if ((dPrescale < 1. || dPrescale >= std::pow(2, 24) / 100 - 1) && dPrescale != 0) {
+      throw cms::Exception("Configuration")
+          << "Prescale value error. Expected prescale value between 1 and 2^24/100 - 1 or 0 got " << dPrescale << "."
+          << std::endl;
+    }
+
+    definition.prescale_ = std::round(dPrescale * 100);
+
+    double dPrescalePreview = algoConfig.getParameter<double>("prescalePreview");
+    if ((dPrescalePreview < 1. || dPrescalePreview >= std::pow(2, 24) / 100 - 1) && dPrescalePreview != 0) {
+      throw cms::Exception("Configuration")
+          << "PrescalePreview value error. Expected prescale value between 1 and 2^24/100 - 1 or 0 got "
+          << dPrescalePreview << "." << std::endl;
+    }
+
+    definition.prescalePreview_ = std::round(dPrescalePreview * 100);
+
+    std::vector<unsigned int> vBunchMask = algoConfig.getParameter<std::vector<unsigned int>>("bunchMask");
+    definition.bunchMask_ =
+        std::set<unsigned int>(std::make_move_iterator(vBunchMask.begin()), std::make_move_iterator(vBunchMask.end()));
+
+    definition.isVeto_ = algoConfig.getParameter<bool>("veto");
+    definition.triggerTypes_ = 0;
+    const std::vector<int> triggerTypes = algoConfig.getParameter<std::vector<int>>("triggerTypes");
+    for (int type : triggerTypes) {
+      definition.triggerTypes_ |= type;
+    }
 
     definition.evaluator_->init(iC);
     algoDefinitions_.emplace(std::move(name), std::move(definition));
@@ -394,12 +439,12 @@ L1GTAlgoBlockProducer::L1GTAlgoBlockProducer(const edm::ParameterSet& config)
   produces<P2GTAlgoBlockCollection>();
 }
 
-void L1GTAlgoBlockProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
+void L1GTAlgoBlockProducer::init(const edm::ProcessHistory& pHistory) {
   const std::string& pName = edm::Service<edm::service::TriggerNamesService>()->getProcessName();
 
   edm::ProcessConfiguration cfg;
 
-  iRun.processHistory().getConfigurationForProcess(pName, cfg);
+  pHistory.getConfigurationForProcess(pName, cfg);
 
   const edm::ParameterSet* pset = edm::pset::Registry::instance()->getMapped(cfg.parameterSetID());
 
@@ -443,20 +488,66 @@ void L1GTAlgoBlockProducer::beginRun(const edm::Run& iRun, const edm::EventSetup
   }
 }
 
+std::shared_ptr<std::unordered_map<std::string, unsigned int>> L1GTAlgoBlockProducer::globalBeginRun(
+    edm::Run const&, edm::EventSetup const&) const {
+  // Reset prescale counters at the beginning of a new run
+  return std::make_shared<std::unordered_map<std::string, unsigned int>>();
+}
+
 void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& eventSetup) {
+  if (!initialized) {
+    init(event.processHistory());
+    initialized = true;
+  }
+
   std::vector<edm::Handle<P2GTCandidateVectorRef>> handles;
   getterOfPassedReferences_.fillHandles(event, handles);
 
   std::unique_ptr<P2GTAlgoBlockCollection> algoCollection = std::make_unique<P2GTAlgoBlockCollection>();
   algoCollection->reserve(algoDefinitions_.size());
 
+  std::unordered_map<std::string, unsigned int>& prescaleCounters = *runCache(event.getRun().index());
+
   for (const auto& [name, algoDef] : algoDefinitions_) {
-    bool initial = algoDef.evaluator_->evaluate(event);
-    // TODO apply prescale and bunch mask
+    bool decisionBeforeBxAndPrescale = algoDef.evaluator_->evaluate(event);
+    bool decisionBeforePrescale = decisionBeforeBxAndPrescale && algoDef.bunchMask_.count(event.bunchCrossing()) == 0;
+    bool decisionFinal = false;
+    bool decisionFinalPreview = false;
+
+    if (algoDef.prescale_ != 0 && decisionBeforePrescale) {
+      if (prescaleCounters.count(name) > 0) {
+        prescaleCounters[name] += 100;
+      } else {
+        prescaleCounters[name] = 100;
+      }
+
+      if (prescaleCounters[name] >= algoDef.prescale_) {
+        decisionFinal = true;
+        prescaleCounters[name] -= algoDef.prescale_;
+      } else {
+        decisionFinal = false;
+      }
+    }
+
+    if (algoDef.prescalePreview_ != 0 && decisionBeforePrescale) {
+      std::string previewName = name + "_preview";
+      if (prescaleCounters.count(previewName) > 0) {
+        prescaleCounters[previewName] += 100;
+      } else {
+        prescaleCounters[previewName] = 100;
+      }
+
+      if (prescaleCounters[previewName] >= algoDef.prescalePreview_) {
+        decisionFinalPreview = true;
+        prescaleCounters[previewName] -= algoDef.prescalePreview_;
+      } else {
+        decisionFinalPreview = false;
+      }
+    }
 
     P2GTCandidateVectorRef trigObjects;
 
-    if (initial) {
+    if (decisionFinal) {
       for (const auto& handle : handles) {
         const std::string& module = handle.provenance()->moduleLabel();
         const std::string& instance = handle.provenance()->productInstanceName();
@@ -467,7 +558,14 @@ void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& ev
       }
     }
 
-    algoCollection->emplace_back(name, initial, initial, initial, std::move(trigObjects));
+    algoCollection->emplace_back(name,
+                                 decisionBeforeBxAndPrescale,
+                                 decisionBeforePrescale,
+                                 decisionFinal,
+                                 decisionFinalPreview,
+                                 algoDef.isVeto_,
+                                 algoDef.triggerTypes_,
+                                 std::move(trigObjects));
   }
 
   event.put(std::move(algoCollection));

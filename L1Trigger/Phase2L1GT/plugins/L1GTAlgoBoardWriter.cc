@@ -1,5 +1,5 @@
 /**
- * BoardDataWriter for validation with hardware. Currently only writing the algo bits is implemented.
+ * AlgoBoardDataWriter for validation with hardware.
  **/
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -27,9 +27,9 @@
 
 using namespace l1t;
 
-class L1GTBoardWriter : public edm::one::EDAnalyzer<> {
+class L1GTAlgoBoardWriter : public edm::one::EDAnalyzer<> {
 public:
-  explicit L1GTBoardWriter(const edm::ParameterSet&);
+  explicit L1GTAlgoBoardWriter(const edm::ParameterSet&);
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -37,8 +37,8 @@ private:
   void analyze(const edm::Event&, const edm::EventSetup&) override;
   void endJob() override;
 
-  const std::vector<unsigned int> channels_;
-  const std::vector<unsigned long long> algoBitMask_;
+  const std::array<unsigned int, 2> channels_;
+  const std::array<unsigned long long, 9> algoBitMask_;
   const edm::EDGetTokenT<P2GTAlgoBlockCollection> algoBlocksToken_;
   l1t::demo::BoardDataWriter boardDataWriter_;
 
@@ -46,9 +46,9 @@ private:
   std::size_t tmuxCounter_;
 };
 
-L1GTBoardWriter::L1GTBoardWriter(const edm::ParameterSet& config)
-    : channels_(config.getParameter<std::vector<unsigned int>>("channels")),
-      algoBitMask_(config.getParameter<std::vector<unsigned long long>>("algoBitMask")),
+L1GTAlgoBoardWriter::L1GTAlgoBoardWriter(const edm::ParameterSet& config)
+    : channels_(config.getParameter<std::array<unsigned int, 2>>("channels")),
+      algoBitMask_(config.getParameter<std::array<unsigned long long, 9>>("algoBitMask")),
       algoBlocksToken_(consumes<P2GTAlgoBlockCollection>(config.getParameter<edm::InputTag>("algoBlocksTag"))),
       boardDataWriter_(
           l1t::demo::parseFileFormat(config.getParameter<std::string>("patternFormat")),
@@ -57,7 +57,7 @@ L1GTBoardWriter::L1GTBoardWriter(const edm::ParameterSet& config)
           9,
           2,
           config.getParameter<unsigned int>("maxLines"),
-          [](const std::vector<unsigned int>& channels) {
+          [](const std::array<unsigned int, 2>& channels) {
             l1t::demo::BoardDataWriter::ChannelMap_t channelMap;
             for (unsigned int channel : channels) {
               channelMap.insert({l1t::demo::LinkId{"Algos", channel}, {l1t::demo::ChannelSpec{2, 0, 0}, {channel}}});
@@ -67,7 +67,7 @@ L1GTBoardWriter::L1GTBoardWriter(const edm::ParameterSet& config)
       linkData_(),
       tmuxCounter_(0) {}
 
-void L1GTBoardWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
+void L1GTAlgoBoardWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
   const P2GTAlgoBlockCollection& algoBlocks = event.get(algoBlocksToken_);
 
   auto algoBlockIt = algoBlocks.begin();
@@ -81,10 +81,9 @@ void L1GTBoardWriter::analyze(const edm::Event& event, const edm::EventSetup& iS
     for (std::size_t word = 0; word < 9; word++) {
       ap_uint<64> mask = algoMaskIt != algoBitMask_.end() ? *algoMaskIt++ : ~static_cast<unsigned long long>(0);
 
-      for (std::size_t idx = 0; idx < 64 && algoBlockIt != algoBlocks.end(); idx++) {
+      for (std::size_t idx = 0; idx < 64 && algoBlockIt != algoBlocks.end(); idx++, algoBlockIt++) {
         linkData_[{"Algos", channel}][word + tmuxCounter_ * 9].set(
             idx, algoBlockIt->decisionBeforeBxMaskAndPrescale() && mask.bit(idx));
-        algoBlockIt++;
       }
     }
   }
@@ -96,7 +95,7 @@ void L1GTBoardWriter::analyze(const edm::Event& event, const edm::EventSetup& iS
   tmuxCounter_ = (tmuxCounter_ + 1) % 2;
 }
 
-void L1GTBoardWriter::endJob() {
+void L1GTAlgoBoardWriter::endJob() {
   if (tmuxCounter_ == 1) {
     boardDataWriter_.addEvent(l1t::demo::EventData(linkData_));
   }
@@ -104,17 +103,26 @@ void L1GTBoardWriter::endJob() {
   boardDataWriter_.flush();
 }
 
-void L1GTBoardWriter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void L1GTAlgoBoardWriter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<std::string>("outputFilename");
   desc.add<std::string>("outputFileExtension", "txt");
   desc.add<edm::InputTag>("algoBlocksTag");
   desc.add<std::vector<unsigned int>>("channels");
-  desc.add<std::vector<unsigned long long>>("algoBitMask", {});
+  desc.add<std::vector<unsigned long long>>("algoBitMask",
+                                            {0xffffffffffffffffull,
+                                             0xffffffffffffffffull,
+                                             0xffffffffffffffffull,
+                                             0xffffffffffffffffull,
+                                             0xffffffffffffffffull,
+                                             0xffffffffffffffffull,
+                                             0xffffffffffffffffull,
+                                             0xffffffffffffffffull,
+                                             0xffffffffffffffffull});
   desc.add<unsigned int>("maxLines", 1024);
   desc.add<std::string>("patternFormat", "EMPv2");
 
   descriptions.addDefault(desc);
 }
 
-DEFINE_FWK_MODULE(L1GTBoardWriter);
+DEFINE_FWK_MODULE(L1GTAlgoBoardWriter);

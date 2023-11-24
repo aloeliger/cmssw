@@ -341,7 +341,8 @@ private:
 
   edm::GetterOfProducts<P2GTCandidateVectorRef> getterOfPassedReferences_;
   std::map<std::string, AlgoDefinition> algoDefinitions_;
-  bool initialized = false;
+  bool initialized_ = false;
+  int bunchCrossingEmu_ = 0;
 };
 
 void L1GTAlgoBlockProducer::fillDescriptions(edm::ConfigurationDescriptions& description) {
@@ -495,9 +496,9 @@ std::shared_ptr<std::unordered_map<std::string, unsigned int>> L1GTAlgoBlockProd
 }
 
 void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& eventSetup) {
-  if (!initialized) {
+  if (!initialized_) {
     init(event.processHistory());
-    initialized = true;
+    initialized_ = true;
   }
 
   std::vector<edm::Handle<P2GTCandidateVectorRef>> handles;
@@ -508,9 +509,11 @@ void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& ev
 
   std::unordered_map<std::string, unsigned int>& prescaleCounters = *runCache(event.getRun().index());
 
+  int bunchCrossing = event.isRealData() ? event.bunchCrossing() : bunchCrossingEmu_ + 1;
+
   for (const auto& [name, algoDef] : algoDefinitions_) {
     bool decisionBeforeBxAndPrescale = algoDef.evaluator_->evaluate(event);
-    bool decisionBeforePrescale = decisionBeforeBxAndPrescale && algoDef.bunchMask_.count(event.bunchCrossing()) == 0;
+    bool decisionBeforePrescale = decisionBeforeBxAndPrescale && algoDef.bunchMask_.count(bunchCrossing) == 0;
     bool decisionFinal = false;
     bool decisionFinalPreview = false;
 
@@ -569,6 +572,8 @@ void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& ev
   }
 
   event.put(std::move(algoCollection));
+
+  bunchCrossingEmu_ = (bunchCrossingEmu_ + 1) % 3564;
 }
 
 DEFINE_FWK_MODULE(L1GTAlgoBlockProducer);

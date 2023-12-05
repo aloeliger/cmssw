@@ -61,11 +61,11 @@ if __name__ == "__main__":
     for idx, event in enumerate(events):
         print('Event:', idx)
 
-        algo_blocks = Handle('l1t::P2GTAlgoBlockCollection')
+        algo_blocks = Handle('l1t::P2GTAlgoBlockMap')
         event.getByLabel('l1tGTAlgoBlockProducer', '', args.process, algo_blocks)
 
-        for algo_blk in algo_blocks.product():
-            print(algo_blk.algoName(), algo_blk.decisionBeforeBxMaskAndPrescale())
+        for name, algo_blk in algo_blocks.product():
+            print(name, algo_blk.decisionBeforeBxMaskAndPrescale())
 
             for obj in algo_blk.trigObjects():
                 if object_name(obj.objectType()) in ["CL2Electron", "CL2Photon"]:

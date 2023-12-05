@@ -437,7 +437,7 @@ L1GTAlgoBlockProducer::L1GTAlgoBlockProducer(const edm::ParameterSet& config)
   }
 
   callWhenNewProductsRegistered(getterOfPassedReferences_);
-  produces<P2GTAlgoBlockCollection>();
+  produces<P2GTAlgoBlockMap>();
 }
 
 void L1GTAlgoBlockProducer::init(const edm::ProcessHistory& pHistory) {
@@ -504,8 +504,7 @@ void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& ev
   std::vector<edm::Handle<P2GTCandidateVectorRef>> handles;
   getterOfPassedReferences_.fillHandles(event, handles);
 
-  std::unique_ptr<P2GTAlgoBlockCollection> algoCollection = std::make_unique<P2GTAlgoBlockCollection>();
-  algoCollection->reserve(algoDefinitions_.size());
+  std::unique_ptr<P2GTAlgoBlockMap> algoCollection = std::make_unique<P2GTAlgoBlockMap>();
 
   std::unordered_map<std::string, unsigned int>& prescaleCounters = *runCache(event.getRun().index());
 
@@ -561,14 +560,14 @@ void L1GTAlgoBlockProducer::produce(edm::Event& event, const edm::EventSetup& ev
       }
     }
 
-    algoCollection->emplace_back(name,
-                                 decisionBeforeBxAndPrescale,
-                                 decisionBeforePrescale,
-                                 decisionFinal,
-                                 decisionFinalPreview,
-                                 algoDef.isVeto_,
-                                 algoDef.triggerTypes_,
-                                 std::move(trigObjects));
+    algoCollection->emplace(name,
+                            P2GTAlgoBlock(decisionBeforeBxAndPrescale,
+                                          decisionBeforePrescale,
+                                          decisionFinal,
+                                          decisionFinalPreview,
+                                          algoDef.isVeto_,
+                                          algoDef.triggerTypes_,
+                                          std::move(trigObjects)));
   }
 
   event.put(std::move(algoCollection));

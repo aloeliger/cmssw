@@ -39,7 +39,7 @@ private:
 
   const std::array<unsigned int, 2> channels_;
   const std::array<unsigned long long, 9> algoBitMask_;
-  const edm::EDGetTokenT<P2GTAlgoBlockCollection> algoBlocksToken_;
+  const edm::EDGetTokenT<P2GTAlgoBlockMap> algoBlocksToken_;
   l1t::demo::BoardDataWriter boardDataWriter_;
 
   std::map<l1t::demo::LinkId, std::vector<ap_uint<64>>> linkData_;
@@ -49,7 +49,7 @@ private:
 L1GTAlgoBoardWriter::L1GTAlgoBoardWriter(const edm::ParameterSet& config)
     : channels_(config.getParameter<std::array<unsigned int, 2>>("channels")),
       algoBitMask_(config.getParameter<std::array<unsigned long long, 9>>("algoBitMask")),
-      algoBlocksToken_(consumes<P2GTAlgoBlockCollection>(config.getParameter<edm::InputTag>("algoBlocksTag"))),
+      algoBlocksToken_(consumes<P2GTAlgoBlockMap>(config.getParameter<edm::InputTag>("algoBlocksTag"))),
       boardDataWriter_(
           l1t::demo::parseFileFormat(config.getParameter<std::string>("patternFormat")),
           config.getParameter<std::string>("outputFilename"),
@@ -68,7 +68,7 @@ L1GTAlgoBoardWriter::L1GTAlgoBoardWriter(const edm::ParameterSet& config)
       tmuxCounter_(0) {}
 
 void L1GTAlgoBoardWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
-  const P2GTAlgoBlockCollection& algoBlocks = event.get(algoBlocksToken_);
+  const P2GTAlgoBlockMap& algoBlocks = event.get(algoBlocksToken_);
 
   auto algoBlockIt = algoBlocks.begin();
   auto algoMaskIt = algoBitMask_.begin();
@@ -82,8 +82,9 @@ void L1GTAlgoBoardWriter::analyze(const edm::Event& event, const edm::EventSetup
       ap_uint<64> mask = algoMaskIt != algoBitMask_.end() ? *algoMaskIt++ : ~static_cast<unsigned long long>(0);
 
       for (std::size_t idx = 0; idx < 64 && algoBlockIt != algoBlocks.end(); idx++, algoBlockIt++) {
+        auto& [algoName, algoBlock] = *algoBlockIt;
         linkData_[{"Algos", channel}][word + tmuxCounter_ * 9].set(
-            idx, algoBlockIt->decisionBeforeBxMaskAndPrescale() && mask.bit(idx));
+            idx, algoBlock.decisionBeforeBxMaskAndPrescale() && mask.bit(idx));
       }
     }
   }

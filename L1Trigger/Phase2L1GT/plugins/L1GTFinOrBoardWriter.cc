@@ -41,7 +41,7 @@ private:
   const std::array<unsigned int, 3> channelsMid_;
   const std::array<unsigned int, 3> channelsHigh_;
   const unsigned int channelFinOr_;
-  const edm::EDGetTokenT<P2GTAlgoBlockCollection> algoBlocksToken_;
+  const edm::EDGetTokenT<P2GTAlgoBlockMap> algoBlocksToken_;
   l1t::demo::BoardDataWriter boardDataWriter_;
 
   std::map<l1t::demo::LinkId, std::vector<ap_uint<64>>> linkData_;
@@ -53,7 +53,7 @@ L1GTFinOrBoardWriter::L1GTFinOrBoardWriter(const edm::ParameterSet& config)
       channelsMid_(config.getParameter<std::array<unsigned int, 3>>("channelsMid")),
       channelsHigh_(config.getParameter<std::array<unsigned int, 3>>("channelsHigh")),
       channelFinOr_(config.getParameter<unsigned int>("channelFinOr")),
-      algoBlocksToken_(consumes<P2GTAlgoBlockCollection>(config.getParameter<edm::InputTag>("algoBlocksTag"))),
+      algoBlocksToken_(consumes<P2GTAlgoBlockMap>(config.getParameter<edm::InputTag>("algoBlocksTag"))),
       boardDataWriter_(l1t::demo::parseFileFormat(config.getParameter<std::string>("patternFormat")),
                        config.getParameter<std::string>("outputFilename"),
                        config.getParameter<std::string>("outputFileExtension"),
@@ -92,7 +92,7 @@ L1GTFinOrBoardWriter::L1GTFinOrBoardWriter(const edm::ParameterSet& config)
       tmuxCounter_(0) {}
 
 void L1GTFinOrBoardWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetup) {
-  const P2GTAlgoBlockCollection& algoBlocks = event.get(algoBlocksToken_);
+  const P2GTAlgoBlockMap& algoBlocks = event.get(algoBlocksToken_);
 
   auto algoBlockIt = algoBlocks.begin();
 
@@ -111,44 +111,48 @@ void L1GTFinOrBoardWriter::analyze(const edm::Event& event, const edm::EventSetu
 
   for (std::size_t word = 0; word < 9; word++) {
     for (std::size_t idx = 0; idx < 64 && algoBlockIt != algoBlocks.end(); idx++, algoBlockIt++) {
+      auto& [alogName, algoBlock] = *algoBlockIt;
       linkData_[l1t::demo::LinkId{"BeforeBxMaskAndPrescaleLow", channelsLow_[0]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionBeforeBxMaskAndPrescale());
+          idx, algoBlock.decisionBeforeBxMaskAndPrescale());
       linkData_[l1t::demo::LinkId{"BeforePrescaleLow", channelsLow_[1]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionBeforePrescale());
-      linkData_[l1t::demo::LinkId{"FinalLow", channelsLow_[2]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionFinal());
+          idx, algoBlock.decisionBeforePrescale());
+      linkData_[l1t::demo::LinkId{"FinalLow", channelsLow_[2]}][word + tmuxCounter_ * 9].set(idx,
+                                                                                             algoBlock.decisionFinal());
     }
   }
 
   for (std::size_t word = 0; word < 9; word++) {
     for (std::size_t idx = 0; idx < 64 && algoBlockIt != algoBlocks.end(); idx++, algoBlockIt++) {
+      auto& [alogName, algoBlock] = *algoBlockIt;
       linkData_[l1t::demo::LinkId{"BeforeBxMaskAndPrescaleMid", channelsMid_[0]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionBeforeBxMaskAndPrescale());
+          idx, algoBlock.decisionBeforeBxMaskAndPrescale());
       linkData_[l1t::demo::LinkId{"BeforePrescaleMid", channelsMid_[1]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionBeforePrescale());
-      linkData_[l1t::demo::LinkId{"FinalMid", channelsMid_[2]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionFinal());
+          idx, algoBlock.decisionBeforePrescale());
+      linkData_[l1t::demo::LinkId{"FinalMid", channelsMid_[2]}][word + tmuxCounter_ * 9].set(idx,
+                                                                                             algoBlock.decisionFinal());
     }
   }
 
   for (std::size_t word = 0; word < 9; word++) {
     for (std::size_t idx = 0; idx < 64 && algoBlockIt != algoBlocks.end(); idx++, algoBlockIt++) {
+      auto& [algoName, algoBlock] = *algoBlockIt;
       linkData_[l1t::demo::LinkId{"BeforeBxMaskAndPrescaleHigh", channelsHigh_[0]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionBeforeBxMaskAndPrescale());
+          idx, algoBlock.decisionBeforeBxMaskAndPrescale());
       linkData_[l1t::demo::LinkId{"BeforePrescaleHigh", channelsHigh_[1]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionBeforePrescale());
+          idx, algoBlock.decisionBeforePrescale());
       linkData_[l1t::demo::LinkId{"FinalHigh", channelsHigh_[2]}][word + tmuxCounter_ * 9].set(
-          idx, algoBlockIt->decisionFinal());
+          idx, algoBlock.decisionFinal());
     }
   }
 
   bool vetoed = false, vetoedPreview = false;
   int finOrByTypes = 0, finOrPreviewByTypes = 0;
   for (auto algoBlockIt = algoBlocks.begin(); algoBlockIt != algoBlocks.end(); algoBlockIt++) {
-    vetoed |= (algoBlockIt->isVeto() && algoBlockIt->decisionFinal());
-    vetoedPreview |= (algoBlockIt->isVeto() && algoBlockIt->decisionFinalPreview());
-    finOrByTypes |= algoBlockIt->decisionFinal() ? algoBlockIt->triggerTypes() : 0;
-    finOrPreviewByTypes |= algoBlockIt->decisionFinalPreview() ? algoBlockIt->triggerTypes() : 0;
+    auto& [alogName, algoBlock] = *algoBlockIt;
+    vetoed |= (algoBlock.isVeto() && algoBlock.decisionFinal());
+    vetoedPreview |= (algoBlock.isVeto() && algoBlock.decisionFinalPreview());
+    finOrByTypes |= algoBlock.decisionFinal() ? algoBlock.triggerTypes() : 0;
+    finOrPreviewByTypes |= algoBlock.decisionFinalPreview() ? algoBlock.triggerTypes() : 0;
   }
 
   // Add FinOrTrigger bits per https://gitlab.cern.ch/cms-cactus/phase2/firmware/gt-final-or#output-finor-bits

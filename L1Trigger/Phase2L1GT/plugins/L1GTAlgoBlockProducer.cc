@@ -433,7 +433,11 @@ L1GTAlgoBlockProducer::L1GTAlgoBlockProducer(const edm::ParameterSet& config)
     }
 
     definition.evaluator_->init(iC);
-    algoDefinitions_.emplace(std::move(name), std::move(definition));
+    auto [iter, wasInserted] = algoDefinitions_.emplace(std::move(name), std::move(definition));
+    if (!wasInserted) {
+      throw cms::Exception("Configuration")
+          << "Algorithm " << iter->first << " already exists. Algorithm names must be unique." << std::endl;
+    }
   }
 
   callWhenNewProductsRegistered(getterOfPassedReferences_);

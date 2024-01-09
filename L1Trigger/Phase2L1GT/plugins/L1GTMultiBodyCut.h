@@ -79,42 +79,6 @@ namespace l1t {
     bool checkObjects(const P2GTCandidate& obj1,
                       const P2GTCandidate& obj2,
                       const P2GTCandidate& obj3,
-                      const P2GTCandidate& obj4,
-                      InvariantMassErrorCollection& massErrors) const {
-      bool res = true;
-
-      if (minInvMassSqrDiv2_ || maxInvMassSqrDiv2_) {
-        int64_t invMassSqrDiv2 = (calc2BodyInvMass(obj1, obj2, massErrors) >> invMassResolutionReduceShift_) +
-                                 (calc2BodyInvMass(obj1, obj3, massErrors) >> invMassResolutionReduceShift_) +
-                                 (calc2BodyInvMass(obj2, obj3, massErrors) >> invMassResolutionReduceShift_) +
-                                 (calc2BodyInvMass(obj1, obj4, massErrors) >> invMassResolutionReduceShift_) +
-                                 (calc2BodyInvMass(obj2, obj4, massErrors) >> invMassResolutionReduceShift_) +
-                                 (calc2BodyInvMass(obj3, obj4, massErrors) >> invMassResolutionReduceShift_);
-
-        res &= minInvMassSqrDiv2_ ? invMassSqrDiv2 > minInvMassSqrDiv2_.value() >> invMassResolutionReduceShift_ : true;
-        res &= maxInvMassSqrDiv2_ ? invMassSqrDiv2 < maxInvMassSqrDiv2_.value() >> invMassResolutionReduceShift_ : true;
-      }
-
-      if (minTransMassSqrDiv2_ || maxTransMassSqrDiv2_) {
-        int64_t transMassDiv2 = (calc2BodyTransMass(obj1, obj2) >> transMassResolutionReduceShift_) +
-                                (calc2BodyTransMass(obj1, obj3) >> transMassResolutionReduceShift_) +
-                                (calc2BodyTransMass(obj2, obj3) >> transMassResolutionReduceShift_) +
-                                (calc2BodyTransMass(obj1, obj4) >> transMassResolutionReduceShift_) +
-                                (calc2BodyTransMass(obj2, obj4) >> transMassResolutionReduceShift_) +
-                                (calc2BodyTransMass(obj3, obj4) >> transMassResolutionReduceShift_);
-
-        res &= minTransMassSqrDiv2_ ? transMassDiv2 > minTransMassSqrDiv2_.value() >> transMassResolutionReduceShift_
-                                    : true;
-        res &= maxTransMassSqrDiv2_ ? transMassDiv2 < maxTransMassSqrDiv2_.value() >> transMassResolutionReduceShift_
-                                    : true;
-      }
-
-      return res;
-    }
-
-    bool checkObjects(const P2GTCandidate& obj1,
-                      const P2GTCandidate& obj2,
-                      const P2GTCandidate& obj3,
                       InvariantMassErrorCollection& massErrors) const {
       bool res = true;
 

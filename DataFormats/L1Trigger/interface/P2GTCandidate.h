@@ -31,8 +31,9 @@ namespace l1t {
     typedef ap_int<13> hwPhi_t;
     typedef ap_int<14> hwEta_t;
     typedef ap_int<18> hwZ0_t;
-    typedef ap_uint<11> hwIso_t;
-    typedef ap_uint<8> hwQual_t;
+    typedef ap_uint<11> hwIsolationPT_t;
+    typedef ap_uint<4> hwQualityFlags_t;
+    typedef ap_uint<10> hwQualityScore_t;
     typedef ap_uint<1> hwCharge_t;
     typedef ap_int<12> hwD0_t;
     typedef ap_uint<4> hwBeta_t;
@@ -98,8 +99,9 @@ namespace l1t {
     void setHwPhi(hwPhi_t hwPhi) { hwPhi_ = hwPhi.to_int(); }
     void setHwEta(hwEta_t hwEta) { hwEta_ = hwEta.to_int(); }
     void setHwZ0(hwZ0_t hwZ0) { hwZ0_ = hwZ0.to_int(); }
-    void setHwIso(hwIso_t hwIso) { hwIso_ = hwIso.to_int(); }
-    void setHwQual(hwQual_t hwQual) { hwQual_ = hwQual.to_int(); }
+    void setHwIsolationPT(hwIsolationPT_t hwIso) { hwIsolationPT_ = hwIso.to_int(); }
+    void setHwQualityFlags(hwQualityFlags_t hwQualityFlags) { hwQualityFlags_ = hwQualityFlags.to_int(); }
+    void setHwQualityScore(hwQualityScore_t hwQualityScore) { hwQualityScore_ = hwQualityScore.to_int(); }
     void setHwCharge(hwCharge_t hwCharge) { hwCharge_ = hwCharge.to_int(); }
     void setHwD0(hwD0_t hwD0) { hwD0_ = hwD0.to_int(); }
     void setHwBeta(hwBeta_t hwBeta) { hwBeta_ = hwBeta.to_int(); }
@@ -149,18 +151,25 @@ namespace l1t {
       return static_cast<int>(hwZ0_);
     }
 
-    hwIso_t hwIso() const {
-      if (!hwIso_) {
-        throw std::invalid_argument("Object doesn't have iso");
+    hwIsolationPT_t hwIsolationPT() const {
+      if (!hwIsolationPT_) {
+        throw std::invalid_argument("Object doesn't have isolationPT");
       }
-      return static_cast<int>(hwIso_);
+      return static_cast<int>(hwIsolationPT_);
     }
 
-    hwQual_t hwQual() const {
-      if (!hwQual_) {
-        throw std::invalid_argument("Object doesn't have qual");
+    hwQualityFlags_t hwQualityFlags() const {
+      if (!hwQualityFlags_) {
+        throw std::invalid_argument("Object doesn't have qualityFlags");
       }
-      return static_cast<int>(hwQual_);
+      return static_cast<int>(hwQualityFlags_);
+    }
+
+    hwQualityScore_t hwQualityScore() const {
+      if (!hwQualityScore_) {
+        throw std::invalid_argument("Object doesn't have qualityScore");
+      }
+      return static_cast<int>(hwQualityScore_);
     }
 
     hwCharge_t hwCharge() const {
@@ -261,8 +270,9 @@ namespace l1t {
     int hwPhi_toInt() const { return hwPhi().to_int(); }
     int hwEta_toInt() const { return hwEta().to_int(); }
     int hwZ0_toInt() const { return hwZ0().to_int(); }
-    int hwIso_toInt() const { return hwIso().to_int(); }
-    int hwQual_toInt() const { return hwQual().to_int(); }
+    int hwIsolationPT_toInt() const { return hwIsolationPT().to_int(); }
+    int hwQualityFlags_toInt() const { return hwQualityFlags().to_int(); }
+    int hwQualityScore_toInt() const { return hwQualityScore().to_int(); }
     int hwCharge_toInt() const { return hwCharge().to_int(); }
     int hwD0_toInt() const { return hwD0().to_int(); }
     int hwBeta_toInt() const { return hwBeta().to_int(); }
@@ -304,8 +314,9 @@ namespace l1t {
     Optional<int> hwPhi_;
     Optional<int> hwEta_;
     Optional<int> hwZ0_;
-    Optional<int> hwIso_;
-    Optional<int> hwQual_;
+    Optional<int> hwIsolationPT_;
+    Optional<int> hwQualityFlags_;
+    Optional<int> hwQualityScore_;
     Optional<int> hwCharge_;
     Optional<int> hwD0_;
     Optional<int> hwBeta_;

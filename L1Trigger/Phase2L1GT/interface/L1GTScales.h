@@ -39,9 +39,10 @@ namespace l1t {
     int to_hw_eta(double value) const { return std::round(value / eta_lsb_); };
     int to_hw_z0(double value) const { return std::round(value / z0_lsb_); };
     // int to_hw_d0(double value) const { return std::round(value / d0_lsb_); };
-    int to_hw_relative_isolation(double value) const {
-      return std::round(pT_lsb_ * value * std::pow(2, isolation_shift_) / isolation_lsb_);
+    int to_hw_relative_isolationPT(double value) const {
+      return std::round(pT_lsb_ * value * std::pow(2, isolation_shift_) / isolationPT_lsb_);
     }
+    int to_hw_isolationPT(double value) const { return std::round(value / isolationPT_lsb_); }
     int to_hw_beta(double value) const { return std::round(value / beta_lsb_); };
     int to_hw_mass(double value) const { return std::round(value / mass_lsb_); };
     int to_hw_seed_pT(double value) const { return std::round(value / seed_pT_lsb_); };
@@ -64,6 +65,7 @@ namespace l1t {
     double to_phi(int value) const { return value * phi_lsb_; };
     double to_eta(int value) const { return value * eta_lsb_; };
     double to_z0(int value) const { return value * z0_lsb_; };
+    double to_isolationPT(int value) const { return value * isolationPT_lsb_; }
     double to_sca_sum(int value) const { return value * sca_sum_lsb_; };
     int to_chg(int value) const { return value == pos_chg_ ? +1 : value == neg_chg_ ? -1 : 0; }
 
@@ -71,7 +73,7 @@ namespace l1t {
     double phi_lsb() const { return phi_lsb_; }
     double eta_lsb() const { return eta_lsb_; }
     double z0_lsb() const { return z0_lsb_; }
-    double isolation_lsb() const { return isolation_lsb_; }
+    double isolationPT_lsb() const { return isolationPT_lsb_; }
     //const double dD_lsb_;
     double beta_lsb() const { return beta_lsb_; }
     double mass_lsb() const { return mass_lsb_; }
@@ -89,7 +91,7 @@ namespace l1t {
     const double eta_lsb_;
     const double z0_lsb_;
     //const double dD_lsb_;
-    const double isolation_lsb_;
+    const double isolationPT_lsb_;
     const double isolation_shift_;
     const double beta_lsb_;
     const double mass_lsb_;

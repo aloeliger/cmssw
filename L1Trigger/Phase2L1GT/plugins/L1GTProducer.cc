@@ -144,7 +144,7 @@ namespace l1t {
       P2GTCandidate gtObj(
           0, reco::ParticleState::PolarLorentzVector(), reco::ParticleState::Point(0, 0, scales_.to_z0(hwZ0)));
       gtObj.hwZ0_ = hwZ0;
-      gtObj.hwQual_ = obj.qualityWord().V.to_int();
+      gtObj.hwQualityScore_ = obj.qualityWord().V.to_int();
       gtObj.hwSum_pT_pv_ = obj.multiplicityWord().V.to_int();
       gtObj.hwNumber_of_tracks_in_pv_ = obj.multiplicityWord().V.to_int();
       gtObj.hwNumber_of_tracks_not_in_pv_ = obj.inverseMultiplicityWord().V.to_int();
@@ -219,7 +219,7 @@ namespace l1t {
       gtObj.hwPhi_ = obj.apPhi().to_int();
       gtObj.hwEta_ = obj.apEta().to_int();
       gtObj.hwZ0_ = hwZ0;
-      gtObj.hwQual_ = obj.apQual().to_int();
+      gtObj.hwQualityScore_ = obj.apQual().to_int();
       gtObj.hwCharge_ = obj.apCharge().to_int();
       gtObj.hwD0_ = obj.apD0().to_int();
       gtObj.objectType_ = P2GTCandidate::GMTSaPromptMuons;
@@ -245,7 +245,7 @@ namespace l1t {
       gtObj.hwPhi_ = obj.apPhi().to_int();
       gtObj.hwEta_ = obj.apEta().to_int();
       gtObj.hwZ0_ = hwZ0;
-      gtObj.hwQual_ = obj.apQual().to_int();
+      gtObj.hwQualityScore_ = obj.apQual().to_int();
       gtObj.hwCharge_ = obj.apCharge().to_int();
       gtObj.hwD0_ = obj.apD0().to_int();
       gtObj.objectType_ = P2GTCandidate::GMTSaDisplacedMuons;
@@ -271,8 +271,8 @@ namespace l1t {
       gtObj.hwPhi_ = obj.apPhi().to_int();
       gtObj.hwEta_ = obj.apEta().to_int();
       gtObj.hwZ0_ = hwZ0;
-      gtObj.hwIso_ = obj.apIso().to_int();
-      gtObj.hwQual_ = obj.apQual().to_int();
+      gtObj.hwIsolationPT_ = obj.apIso().to_int();
+      gtObj.hwQualityScore_ = obj.apQual().to_int();
       gtObj.hwCharge_ = obj.apCharge().to_int();
       gtObj.hwD0_ = obj.apD0().to_int();
       gtObj.hwBeta_ = obj.apBeta().to_int();
@@ -319,8 +319,8 @@ namespace l1t {
       gtObj.hwPT_ = gtPhoton.v3.pt.V.to_int();
       gtObj.hwPhi_ = gtPhoton.v3.phi.V.to_int();
       gtObj.hwEta_ = gtPhoton.v3.eta.V.to_int();
-      gtObj.hwIso_ = gtPhoton.isolation.V.to_int();
-      gtObj.hwQual_ = gtPhoton.quality.V.to_int();
+      gtObj.hwIsolationPT_ = gtPhoton.isolation.V.to_int();
+      gtObj.hwQualityFlags_ = gtPhoton.quality.V.to_int();
       gtObj.objectType_ = P2GTCandidate::CL2Photons;
 
       outputCollection->push_back(gtObj);
@@ -344,8 +344,8 @@ namespace l1t {
       gtObj.hwPhi_ = gtElectron.v3.phi.V.to_int();
       gtObj.hwEta_ = gtElectron.v3.eta.V.to_int();
       gtObj.hwZ0_ = hwZ0;
-      gtObj.hwIso_ = gtElectron.isolation.V.to_int();
-      gtObj.hwQual_ = gtElectron.quality.V.to_int();
+      gtObj.hwIsolationPT_ = gtElectron.isolation.V.to_int();
+      gtObj.hwQualityFlags_ = gtElectron.quality.V.to_int();
       gtObj.hwCharge_ = gtElectron.charge.V.to_int();
       gtObj.objectType_ = P2GTCandidate::CL2Electrons;
 
@@ -371,7 +371,7 @@ namespace l1t {
       gtObj.hwSeed_z0_ = gtTau.seed_z0.V.to_int();
       gtObj.hwCharge_ = gtTau.charge.V.to_int();
       gtObj.hwType_ = gtTau.type.V.to_int();
-      gtObj.hwIso_ = gtTau.isolation.V.to_int();
+      gtObj.hwQualityScore_ = gtTau.isolation.V.to_int();
       gtObj.objectType_ = P2GTCandidate::CL2Taus;
 
       outputCollection->push_back(gtObj);

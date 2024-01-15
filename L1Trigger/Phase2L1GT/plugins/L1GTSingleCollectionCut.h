@@ -55,21 +55,38 @@ namespace l1t {
               "minScalarSumPt", config, [&scales](double value) { return scales.to_hw_pT(value); })),
           maxScalarSumPt_(getOptionalParam<int, double>(
               "maxScalarSumPt", config, [&scales](double value) { return scales.to_hw_pT(value); })),
-          qual_(config.getParameter<std::vector<unsigned int>>("qual")),
+          minQualityScore_(getOptionalParam<unsigned int>("minQualityScore", config)),
+          maxQualityScore_(getOptionalParam<unsigned int>("maxQualityScore", config)),
+          qualityFlags_(getOptionalParam<unsigned int>("qualityFlags", config)),
           minAbsEta_(getOptionalParam<int, double>(
               "minAbsEta", config, [&scales](double value) { return scales.to_hw_eta(value); })),
           maxAbsEta_(getOptionalParam<int, double>(
               "maxAbsEta", config, [&scales](double value) { return scales.to_hw_eta(value); })),
-          maxIso_(getOptionalParam<int, double>(
-              "maxIso", config, [&scales](double value) { return scales.to_hw_relative_isolation(value); })),
-          minHwIso_(getOptionalParam<int>("minHwIso", config)),
+          minIsolationPT_(getOptionalParam<int, double>(
+              "minRelIsolationPT",
+              config,
+              [&scales](double value) { return scales.to_hw_isolationPT(value); })),
+          maxIsolationPT_(getOptionalParam<int, double>(
+              "maxRelIsolationPT",
+              config,
+              [&scales](double value) { return scales.to_hw_isolationPT(value); })),
+          minRelIsolationPT_(getOptionalParam<int, double>(
+              "minRelIsolationPT",
+              config,
+              [&scales](double value) { return scales.to_hw_relative_isolationPT(value); })),
+          maxRelIsolationPT_(getOptionalParam<int, double>(
+              "maxRelIsolationPT",
+              config,
+              [&scales](double value) { return scales.to_hw_relative_isolationPT(value); })),
           regionsAbsEtaLowerBounds_(getParamVector<int, double>(
               "regionsAbsEtaLowerBounds", config, [&scales](double value) { return scales.to_hw_eta(value); })),
           regionsMinPt_(getParamVector<int, double>(
               "regionsMinPt", config, [&scales](double value) { return scales.to_hw_pT(value); })),
-          regionsMaxIso_(getParamVector<int, double>(
-              "regionsMaxIso", config, [&scales](double value) { return scales.to_hw_relative_isolation(value); })),
-          regionsQual_(config.getParameter<std::vector<unsigned int>>("regionsQual")),
+          regionsMaxRelIsolationPT_(getParamVector<int, double>(
+              "regionsMaxRelIsolationPT",
+              config,
+              [&scales](double value) { return scales.to_hw_relative_isolationPT(value); })),
+          regionsQualityFlags_(config.getParameter<std::vector<unsigned int>>("regionsQualityFlags")),
           minPrimVertDz_(getOptionalParam<int, double>(
               "minPrimVertDz", config, [&scales](double value) { return scales.to_hw_z0(value); })),
           maxPrimVertDz_(getOptionalParam<int, double>(
@@ -97,12 +114,20 @@ namespace l1t {
       result &= minScalarSumPt_ ? (obj.hwSca_sum() > minScalarSumPt_) : true;
       result &= maxScalarSumPt_ ? (obj.hwSca_sum() < minScalarSumPt_) : true;
 
-      result &= qual_.empty() ? true : std::find(qual_.begin(), qual_.end(), obj.hwQual().to_uint()) != qual_.end();
-      result &= maxIso_ ? obj.hwIso().to_int64() << scales_.isolation_shift() <
-                              static_cast<int64_t>(maxIso_.value()) * obj.hwPT().to_int64()
-                        : true;
+      result &= minQualityScore_ ? (obj.hwQualityScore() > minQualityScore_) : true;
+      result &= maxQualityScore_ ? (obj.hwQualityScore() < maxQualityScore_) : true;
+      result &= qualityFlags_ ? (obj.hwQualityFlags().to_uint() & qualityFlags_.value()) == qualityFlags_ : true;
 
-      result &= minHwIso_ ? (obj.hwIso() > minHwIso_) : true;
+      result &= minIsolationPT_ ? (obj.hwSca_sum() > minScalarSumPt_) : true;
+      result &= maxIsolationPT_ ? (obj.hwSca_sum() < minScalarSumPt_) : true;
+
+      result &= minRelIsolationPT_ ? obj.hwIsolationPT().to_int64() << scales_.isolation_shift() >
+                                         static_cast<int64_t>(minRelIsolationPT_.value()) * obj.hwPT().to_int64()
+                                   : true;
+      result &= maxRelIsolationPT_ ? obj.hwIsolationPT().to_int64() << scales_.isolation_shift() <
+                                         static_cast<int64_t>(maxRelIsolationPT_.value()) * obj.hwPT().to_int64()
+                                   : true;
+
       result &= regionsAbsEtaLowerBounds_.empty() ? true : checkEtaDependentCuts(obj);
       return result;
     }
@@ -141,15 +166,20 @@ namespace l1t {
       desc.addOptional<double>("maxZ0");
       desc.addOptional<double>("minScalarSumPt");
       desc.addOptional<double>("maxScalarSumPt");
-      desc.add<std::vector<unsigned int>>("qual", {});
+      desc.addOptional<unsigned int>("minQualityScore");
+      desc.addOptional<unsigned int>("maxQualityScore");
+      desc.addOptional<unsigned int>("qualityFlags");
+      desc.add<std::vector<unsigned int>>("regions", {});
       desc.addOptional<double>("minAbsEta");
       desc.addOptional<double>("maxAbsEta");
-      desc.addOptional<double>("maxIso");
-      desc.addOptional<int>("minHwIso");
+      desc.addOptional<double>("minIsolationPT");
+      desc.addOptional<double>("maxIsolationPT");
+      desc.addOptional<double>("minRelIsolationPT");
+      desc.addOptional<double>("maxRelIsolationPT");
       desc.add<std::vector<double>>("regionsAbsEtaLowerBounds", {});
       desc.add<std::vector<double>>("regionsMinPt", {});
-      desc.add<std::vector<double>>("regionsMaxIso", {});
-      desc.add<std::vector<unsigned int>>("regionsQual", {});
+      desc.add<std::vector<double>>("regionsMaxRelIsolationPT", {});
+      desc.add<std::vector<unsigned int>>("regionsQualityFlags", {});
       desc.addOptional<double>("minPrimVertDz");
       desc.addOptional<double>("maxPrimVertDz");
       desc.addOptional<unsigned int>("primVertex");
@@ -164,10 +194,13 @@ namespace l1t {
       unsigned int index;
       index = atIndex(obj.hwEta());
       res &= regionsMinPt_.empty() ? true : obj.hwPT() > regionsMinPt_[index];
-      res &= regionsMaxIso_.empty() ? true
-                                    : obj.hwIso().to_int64() << scales_.isolation_shift() <
-                                          static_cast<int64_t>(regionsMaxIso_[index]) * obj.hwPT().to_int64();
-      res &= regionsQual_.empty() ? true : (obj.hwQual().to_uint() & regionsQual_[index]) == regionsQual_[index];
+      res &= regionsMaxRelIsolationPT_.empty()
+                 ? true
+                 : obj.hwIsolationPT().to_int64() << scales_.isolation_shift() <
+                       static_cast<int64_t>(regionsMaxRelIsolationPT_[index]) * obj.hwPT().to_int64();
+      res &= regionsQualityFlags_.empty()
+                 ? true
+                 : (obj.hwQualityFlags().to_uint() & regionsQualityFlags_[index]) == regionsQualityFlags_[index];
       return res;
     }
 
@@ -196,15 +229,19 @@ namespace l1t {
     const std::optional<int> maxZ0_;
     const std::optional<int> minScalarSumPt_;
     const std::optional<int> maxScalarSumPt_;
-    const std::vector<unsigned int> qual_;
+    const std::optional<unsigned int> minQualityScore_;
+    const std::optional<unsigned int> maxQualityScore_;
+    const std::optional<unsigned int> qualityFlags_;
     const std::optional<int> minAbsEta_;
     const std::optional<int> maxAbsEta_;
-    const std::optional<int> maxIso_;
-    const std::optional<int> minHwIso_;
+    const std::optional<int> minIsolationPT_;
+    const std::optional<int> maxIsolationPT_;
+    const std::optional<int> minRelIsolationPT_;
+    const std::optional<int> maxRelIsolationPT_;
     const std::vector<int> regionsAbsEtaLowerBounds_;
     const std::vector<int> regionsMinPt_;
-    const std::vector<int> regionsMaxIso_;
-    const std::vector<unsigned int> regionsQual_;
+    const std::vector<int> regionsMaxRelIsolationPT_;
+    const std::vector<unsigned int> regionsQualityFlags_;
     const std::optional<int> minPrimVertDz_;
     const std::optional<int> maxPrimVertDz_;
     const std::optional<unsigned int> primVertex_;

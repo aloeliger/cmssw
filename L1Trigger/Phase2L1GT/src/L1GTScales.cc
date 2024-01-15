@@ -10,7 +10,7 @@ namespace l1t {
                          double eta_lsb,
                          double z0_lsb,
                          //double d0_lsb,
-                         double isolation_lsb,
+                         double isolationPT_lsb,
                          double beta_lsb,
                          double mass_lsb,
                          double seed_pT_lsb,
@@ -24,8 +24,8 @@ namespace l1t {
         eta_lsb_(eta_lsb),
         z0_lsb_(z0_lsb),
         //d0_lsb_(d0_lsb),
-        isolation_lsb_(isolation_lsb),
-        isolation_shift_(RELATIVE_ISOLATION_RESOLUTION + std::log2(isolation_lsb_ / pT_lsb_)),
+        isolationPT_lsb_(isolationPT_lsb),
+        isolation_shift_(RELATIVE_ISOLATION_RESOLUTION + std::log2(isolationPT_lsb_ / pT_lsb_)),
         beta_lsb_(beta_lsb),
         mass_lsb_(mass_lsb),
         seed_pT_lsb_(seed_pT_lsb),
@@ -41,8 +41,8 @@ namespace l1t {
         eta_lsb_(config.getParameter<double>("eta_lsb")),
         z0_lsb_(config.getParameter<double>("z0_lsb")),
         //d0_lsb_(config.getParameter<double>("d0_lsb")),
-        isolation_lsb_(config.getParameter<double>("isolation_lsb")),
-        isolation_shift_(RELATIVE_ISOLATION_RESOLUTION + std::log2(isolation_lsb_ / pT_lsb_)),
+        isolationPT_lsb_(config.getParameter<double>("isolationPT_lsb")),
+        isolation_shift_(RELATIVE_ISOLATION_RESOLUTION + std::log2(isolationPT_lsb_ / pT_lsb_)),
         beta_lsb_(config.getParameter<double>("beta_lsb")),
         mass_lsb_(config.getParameter<double>("mass_lsb")),
         seed_pT_lsb_(config.getParameter<double>("seed_pT_lsb")),
@@ -58,7 +58,7 @@ namespace l1t {
     desc.add<double>("eta_lsb");
     desc.add<double>("z0_lsb");
     //desc.add<double>("d0_lsb");
-    desc.add<double>("isolation_lsb");
+    desc.add<double>("isolationPT_lsb");
     desc.add<double>("beta_lsb");
     desc.add<double>("mass_lsb");
     desc.add<double>("seed_pT_lsb");
@@ -89,7 +89,7 @@ namespace l1t {
         .def("to_hw_phi", &L1GTScales::to_hw_phi)
         .def("to_hw_eta", &L1GTScales::to_hw_eta)
         .def("to_hw_z0", &L1GTScales::to_hw_z0)
-        .def("to_hw_relative_isolation", &L1GTScales::to_hw_relative_isolation)
+        .def("to_hw_relative_isolationPT", &L1GTScales::to_hw_relative_isolationPT)
         .def("isolation_shift", &L1GTScales::isolation_shift)
         .def("to_hw_beta", &L1GTScales::to_hw_beta)
         .def("to_hw_mass", &L1GTScales::to_hw_mass)

@@ -537,8 +537,14 @@ namespace l1t {
     ap_uint<1> charge;
     ap_int<10> z0;
 
-    L1TGT_CL2_Electron(
-        int valid = 0, int pT = 0, int phi = 0, int eta = 0, int qualityFlags = 0, int isolationPT = 0, int charge = 0, int z0 = 0)
+    L1TGT_CL2_Electron(int valid = 0,
+                       int pT = 0,
+                       int phi = 0,
+                       int eta = 0,
+                       int qualityFlags = 0,
+                       int isolationPT = 0,
+                       int charge = 0,
+                       int z0 = 0)
         : L1TGT_Common3Vector(valid, pT, phi, eta),
           qualityFlags(qualityFlags),
           isolationPT(isolationPT),

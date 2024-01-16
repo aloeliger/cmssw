@@ -25,7 +25,7 @@ namespace l1t {
                double mass_lsb,
                double seed_pT_lsb,
                double seed_dZ_lsb,
-               double sca_sum_lsb,
+               double scalarSumPT_lsb,
                double sum_pT_pv_lsb,
                int pos_chg,
                int neg_chg);
@@ -47,7 +47,7 @@ namespace l1t {
     int to_hw_mass(double value) const { return std::round(value / mass_lsb_); };
     int to_hw_seed_pT(double value) const { return std::round(value / seed_pT_lsb_); };
     int to_hw_seed_z0(double value) const { return std::round(value / seed_z0_lsb_); };
-    int to_hw_sca_sum(double value) const { return std::round(value / sca_sum_lsb_); };
+    int to_hw_scalarSumPT(double value) const { return std::round(value / scalarSumPT_lsb_); };
     int to_hw_sum_pT_pv(double value) const { return std::round(value / sum_pT_pv_lsb_); };
 
     int to_hw_dRSquared(double value) const { return std::round(value * value / (eta_lsb_ * eta_lsb_)); }
@@ -66,7 +66,7 @@ namespace l1t {
     double to_eta(int value) const { return value * eta_lsb_; };
     double to_z0(int value) const { return value * z0_lsb_; };
     double to_isolationPT(int value) const { return value * isolationPT_lsb_; }
-    double to_sca_sum(int value) const { return value * sca_sum_lsb_; };
+    double to_scalarSumPT(int value) const { return value * scalarSumPT_lsb_; };
     int to_chg(int value) const { return value == pos_chg_ ? +1 : value == neg_chg_ ? -1 : 0; }
 
     double pT_lsb() const { return pT_lsb_; }
@@ -79,7 +79,7 @@ namespace l1t {
     double mass_lsb() const { return mass_lsb_; }
     double seed_pT_lsb() const { return seed_pT_lsb_; }
     double seed_z0_lsb() const { return seed_z0_lsb_; }
-    double sca_sum_lsb() const { return sca_sum_lsb_; }
+    double scalarSumPT_lsb() const { return scalarSumPT_lsb_; }
     double sum_pT_pv_lsb() const { return sum_pT_pv_lsb_; }
     int pos_chg() const { return pos_chg_; }
     int neg_chg() const { return neg_chg_; }
@@ -97,7 +97,7 @@ namespace l1t {
     const double mass_lsb_;
     const double seed_pT_lsb_;
     const double seed_z0_lsb_;
-    const double sca_sum_lsb_;
+    const double scalarSumPT_lsb_;
     const double sum_pT_pv_lsb_;
     const int pos_chg_;
     const int neg_chg_;

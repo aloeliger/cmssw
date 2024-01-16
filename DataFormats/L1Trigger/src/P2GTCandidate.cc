@@ -7,7 +7,7 @@ namespace l1t {
            hwZ0_ == rhs.hwZ0_ && hwIsolationPT_ == rhs.hwIsolationPT_ && hwQualityScore_ == rhs.hwQualityScore_ &&
            hwQualityFlags_ == rhs.hwQualityFlags_ && hwCharge_ == rhs.hwCharge_ && hwD0_ == rhs.hwD0_ &&
            hwBeta_ == rhs.hwBeta_ && hwMass_ == rhs.hwMass_ && hwIndex_ == rhs.hwIndex_ &&
-           hwSeed_pT_ == rhs.hwSeed_pT_ && hwSeed_z0_ == rhs.hwSeed_z0_ && hwSca_sum_ == rhs.hwSca_sum_ &&
+           hwSeed_pT_ == rhs.hwSeed_pT_ && hwSeed_z0_ == rhs.hwSeed_z0_ && hwScalarSumPT_ == rhs.hwScalarSumPT_ &&
            hwNumber_of_tracks_ == rhs.hwNumber_of_tracks_ && hwSum_pT_pv_ == rhs.hwSum_pT_pv_ &&
            hwType_ == rhs.hwType_ && hwNumber_of_tracks_in_pv_ == rhs.hwNumber_of_tracks_in_pv_ &&
            hwNumber_of_tracks_not_in_pv_ == rhs.hwNumber_of_tracks_not_in_pv_;

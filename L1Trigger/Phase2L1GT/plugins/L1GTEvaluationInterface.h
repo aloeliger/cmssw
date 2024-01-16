@@ -75,24 +75,24 @@ namespace l1t {
     ap_uint<1> valid;
     ap_uint<16> pT;
     ap_int<13> phi;
-    ap_uint<16> scalar_sum_pT;
+    ap_uint<16> scalarSumPT;
 
-    L1TGT_CommonSum(int valid = 0, int pT = 0, int phi = 0, int scalar_sum_pT = 0)
-        : valid(valid), pT(pT), phi{phi}, scalar_sum_pT(scalar_sum_pT) {}
+    L1TGT_CommonSum(int valid = 0, int pT = 0, int phi = 0, int scalarSumPT = 0)
+        : valid(valid), pT(pT), phi{phi}, scalarSumPT(scalarSumPT) {}
 
-    ap_uint<46> pack_common() const { return l1t_pack_int<ap_uint<46>>(valid, pT, phi, scalar_sum_pT); }
+    ap_uint<46> pack_common() const { return l1t_pack_int<ap_uint<46>>(valid, pT, phi, scalarSumPT); }
 
     ap_uint<64> pack() const override { return pack_common(); }
 
     static L1TGT_CommonSum from_GTObject(const P2GTCandidate& gtObject) {
-      return L1TGT_CommonSum(1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwSca_sum());
+      return L1TGT_CommonSum(1, gtObject.hwPT(), gtObject.hwPhi(), gtObject.hwScalarSumPT());
     }
 
     P2GTCandidate to_GTObject() const override {
       P2GTCandidate gt_object;
       gt_object.setHwPT(pT);
       gt_object.setHwPhi(phi);
-      gt_object.setHwSca_sum(scalar_sum_pT);
+      gt_object.setHwScalarSumPT(scalarSumPT);
 
       return gt_object;
     }

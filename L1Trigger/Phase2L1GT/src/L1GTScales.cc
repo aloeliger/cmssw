@@ -15,7 +15,7 @@ namespace l1t {
                          double mass_lsb,
                          double seed_pT_lsb,
                          double seed_z0_lsb,
-                         double sca_sum_lsb,
+                         double scalarSumPT_lsb,
                          double sum_pT_pv_lsb,
                          int pos_chg,
                          int neg_chg)
@@ -30,7 +30,7 @@ namespace l1t {
         mass_lsb_(mass_lsb),
         seed_pT_lsb_(seed_pT_lsb),
         seed_z0_lsb_(seed_z0_lsb),
-        sca_sum_lsb_(sca_sum_lsb),
+        scalarSumPT_lsb_(scalarSumPT_lsb),
         sum_pT_pv_lsb_(sum_pT_pv_lsb),
         pos_chg_(pos_chg),
         neg_chg_(neg_chg) {}
@@ -47,7 +47,7 @@ namespace l1t {
         mass_lsb_(config.getParameter<double>("mass_lsb")),
         seed_pT_lsb_(config.getParameter<double>("seed_pT_lsb")),
         seed_z0_lsb_(config.getParameter<double>("seed_z0_lsb")),
-        sca_sum_lsb_(config.getParameter<double>("sca_sum_lsb")),
+        scalarSumPT_lsb_(config.getParameter<double>("scalarSumPT_lsb")),
         sum_pT_pv_lsb_(config.getParameter<double>("sum_pT_pv_lsb")),
         pos_chg_(config.getParameter<int>("pos_chg")),
         neg_chg_(config.getParameter<int>("neg_chg")) {}
@@ -63,7 +63,7 @@ namespace l1t {
     desc.add<double>("mass_lsb");
     desc.add<double>("seed_pT_lsb");
     desc.add<double>("seed_z0_lsb");
-    desc.add<double>("sca_sum_lsb");
+    desc.add<double>("scalarSumPT_lsb");
     desc.add<double>("sum_pT_pv_lsb");
     desc.add<int>("pos_chg");
     desc.add<int>("neg_chg");
@@ -95,7 +95,7 @@ namespace l1t {
         .def("to_hw_mass", &L1GTScales::to_hw_mass)
         .def("to_hw_seed_pT", &L1GTScales::to_hw_seed_pT)
         .def("to_hw_seed_z0", &L1GTScales::to_hw_seed_z0)
-        .def("to_hw_sca_sum", &L1GTScales::to_hw_sca_sum)
+        .def("to_hw_scalarSumPT", &L1GTScales::to_hw_scalarSumPT)
         .def("to_hw_sum_pT_pv", &L1GTScales::to_hw_sum_pT_pv)
         .def("to_hw_dRSquared", &L1GTScales::to_hw_dRSquared)
         .def("to_hw_InvMassSqrDiv2", &L1GTScales::to_hw_InvMassSqrDiv2)

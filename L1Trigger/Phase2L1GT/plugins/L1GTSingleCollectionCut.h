@@ -107,15 +107,15 @@ namespace l1t {
       result &= minAbsEta_ ? (abs(obj.hwEta()) > minAbsEta_) : true;
       result &= maxAbsEta_ ? (abs(obj.hwEta()) < maxAbsEta_) : true;
 
-      result &= minScalarSumPt_ ? (obj.hwSca_sum() > minScalarSumPt_) : true;
-      result &= maxScalarSumPt_ ? (obj.hwSca_sum() < minScalarSumPt_) : true;
+      result &= minScalarSumPt_ ? (obj.hwScalarSumPT() > minScalarSumPt_) : true;
+      result &= maxScalarSumPt_ ? (obj.hwScalarSumPT() < minScalarSumPt_) : true;
 
       result &= minQualityScore_ ? (obj.hwQualityScore() > minQualityScore_) : true;
       result &= maxQualityScore_ ? (obj.hwQualityScore() < maxQualityScore_) : true;
       result &= qualityFlags_ ? (obj.hwQualityFlags().to_uint() & qualityFlags_.value()) == qualityFlags_ : true;
 
-      result &= minIsolationPT_ ? (obj.hwSca_sum() > minScalarSumPt_) : true;
-      result &= maxIsolationPT_ ? (obj.hwSca_sum() < minScalarSumPt_) : true;
+      result &= minIsolationPT_ ? (obj.hwScalarSumPT() > minScalarSumPt_) : true;
+      result &= maxIsolationPT_ ? (obj.hwScalarSumPT() < minScalarSumPt_) : true;
 
       result &= minRelIsolationPT_ ? obj.hwIsolationPT().to_int64() << scales_.isolation_shift() >
                                          static_cast<int64_t>(minRelIsolationPT_.value()) * obj.hwPT().to_int64()

@@ -391,7 +391,7 @@ namespace l1t {
                             scales_.to_pT(sum.vector_pt.V.to_int()), 0, scales_.to_phi(sum.vector_phi.V.to_int()), 0));
     gtObj.hwPT_ = sum.vector_pt.V.to_int();
     gtObj.hwPhi_ = sum.vector_phi.V.to_int();
-    gtObj.hwSca_sum_ = sum.scalar_pt.V.to_int();
+    gtObj.hwScalarSumPT_ = sum.scalar_pt.V.to_int();
     gtObj.objectType_ = P2GTCandidate::CL2EtSum;
 
     outputCollection->push_back(gtObj);
@@ -408,7 +408,7 @@ namespace l1t {
         0, reco::ParticleState::PolarLorentzVector(scales_.to_pT(mht.hwPt()), 0, scales_.to_phi(mht.hwPhi()), 0));
     gtObj.hwPT_ = mht.hwPt();
     gtObj.hwPhi_ = mht.hwPhi();
-    gtObj.hwSca_sum_ = ht.hwPt();
+    gtObj.hwScalarSumPT_ = ht.hwPt();
     gtObj.objectType_ = P2GTCandidate::CL2HtSum;
 
     outputCollection->push_back(gtObj);

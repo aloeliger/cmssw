@@ -41,7 +41,7 @@ namespace l1t {
     typedef ap_uint<16> hwIndex_t;
     typedef ap_uint<10> hwSeed_pT_t;
     typedef ap_int<10> hwSeed_z0_t;
-    typedef ap_uint<16> hwSca_sum_t;
+    typedef ap_uint<16> hwScalarSumPT_t;
     typedef ap_uint<5> hwNumber_of_tracks_t;
     typedef ap_uint<12> hwSum_pT_pv_t;
     typedef ap_uint<2> hwType_t;
@@ -109,7 +109,7 @@ namespace l1t {
     void setHwIndex(hwIndex_t hwIndex) { hwIndex_ = hwIndex.to_int(); }
     void setHwSeed_pT(hwSeed_pT_t hwSeed_pT) { hwSeed_pT_ = hwSeed_pT.to_int(); }
     void setHwSeed_z0(hwSeed_z0_t hwSeed_z0) { hwSeed_z0_ = hwSeed_z0.to_int(); }
-    void setHwSca_sum(hwSca_sum_t hwSca_sum) { hwSca_sum_ = hwSca_sum.to_int(); }
+    void setHwScalarSumPT(hwScalarSumPT_t hwScalarSumPT) { hwScalarSumPT_ = hwScalarSumPT.to_int(); }
     void setHwNumber_of_tracks(hwNumber_of_tracks_t hwNumber_of_tracks) {
       hwNumber_of_tracks_ = hwNumber_of_tracks.to_int();
     }
@@ -221,11 +221,11 @@ namespace l1t {
       return static_cast<int>(hwSeed_z0_);
     }
 
-    hwSca_sum_t hwSca_sum() const {
-      if (!hwSca_sum_) {
-        throw std::invalid_argument("Object doesn't have sca_sum");
+    hwScalarSumPT_t hwScalarSumPT() const {
+      if (!hwScalarSumPT_) {
+        throw std::invalid_argument("Object doesn't have scalarSumPT");
       }
-      return static_cast<int>(hwSca_sum_);
+      return static_cast<int>(hwScalarSumPT_);
     }
 
     hwNumber_of_tracks_t hwNumber_of_tracks() const {
@@ -280,7 +280,7 @@ namespace l1t {
     int hwIndex_toInt() const { return hwIndex().to_int(); }
     int hwSeed_pT_toInt() const { return hwSeed_pT().to_int(); }
     int hwSeed_z0_toInt() const { return hwSeed_z0().to_int(); }
-    int hwSca_sum_toInt() const { return hwSca_sum().to_int(); }
+    int hwScalarSumPT_toInt() const { return hwScalarSumPT().to_int(); }
     int hwNumber_of_tracks_toInt() const { return hwNumber_of_tracks().to_int(); }
     int hwSum_pT_pv_toInt() const { return hwSum_pT_pv().to_int(); }
     int hwType_toInt() const { return hwType().to_int(); }
@@ -324,7 +324,7 @@ namespace l1t {
     Optional<int> hwIndex_;
     Optional<int> hwSeed_pT_;
     Optional<int> hwSeed_z0_;
-    Optional<int> hwSca_sum_;
+    Optional<int> hwScalarSumPT_;
     Optional<int> hwNumber_of_tracks_;
 
     // TODO ?

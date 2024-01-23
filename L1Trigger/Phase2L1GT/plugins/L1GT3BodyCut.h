@@ -55,10 +55,10 @@ namespace l1t {
           invMassResolutionReduceShift_([&]() {
             if (minInvMassSqrDiv2_) {
               return std::max<int>(
-                  std::ceil(std::log2(minInvMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 20, 0);
+                  std::ceil(std::log2(minInvMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 16, 0);
             } else if (maxInvMassSqrDiv2_) {
               return std::max<int>(
-                  std::ceil(std::log2(maxInvMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 20, 0);
+                  std::ceil(std::log2(maxInvMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 16, 0);
             } else {
               return 0;
             }
@@ -66,10 +66,10 @@ namespace l1t {
           transMassResolutionReduceShift_([&]() {
             if (minTransMassSqrDiv2_) {
               return std::max<int>(
-                  std::ceil(std::log2(minTransMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 20, 0);
+                  std::ceil(std::log2(minTransMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 16, 0);
             } else if (maxTransMassSqrDiv2_) {
               return std::max<int>(
-                  std::ceil(std::log2(maxTransMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 20, 0);
+                  std::ceil(std::log2(maxTransMassSqrDiv2_.value() * cosPhiLUT_.output_scale() + 1.0)) - 16, 0);
             } else {
               return 0;
             }

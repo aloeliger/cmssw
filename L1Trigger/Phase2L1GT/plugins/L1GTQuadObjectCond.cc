@@ -12,8 +12,8 @@
 
 #include "L1Trigger/Phase2L1GT/interface/L1GTScales.h"
 #include "L1GTSingleCollectionCut.h"
-#include "L1GTDeltaCut.h"
-#include "L1GTMultiBodyCut.h"
+#include "L1GTCorrelationalCut.h"
+#include "L1GT3BodyCut.h"
 #include "L1GTSingleInOutLUT.h"
 
 #include <cinttypes>
@@ -45,17 +45,17 @@ private:
   const bool enable_sanity_checks_;
   const bool inv_mass_checks_;
 
-  const L1GTDeltaCut delta12Cuts_;
-  const L1GTDeltaCut delta13Cuts_;
-  const L1GTDeltaCut delta23Cuts_;
-  const L1GTDeltaCut delta14Cuts_;
-  const L1GTDeltaCut delta24Cuts_;
-  const L1GTDeltaCut delta34Cuts_;
+  const L1GTCorrelationalCut correl12Cuts_;
+  const L1GTCorrelationalCut correl13Cuts_;
+  const L1GTCorrelationalCut correl23Cuts_;
+  const L1GTCorrelationalCut correl14Cuts_;
+  const L1GTCorrelationalCut correl24Cuts_;
+  const L1GTCorrelationalCut correl34Cuts_;
 
-  const L1GTMultiBodyCut delta123Cuts_;
-  const L1GTMultiBodyCut delta124Cuts_;
-  const L1GTMultiBodyCut delta134Cuts_;
-  const L1GTMultiBodyCut delta234Cuts_;
+  const L1GT3BodyCut correl123Cuts_;
+  const L1GT3BodyCut correl124Cuts_;
+  const L1GT3BodyCut correl134Cuts_;
+  const L1GT3BodyCut correl234Cuts_;
 
   const edm::EDGetTokenT<P2GTCandidateCollection> token1_;
   const edm::EDGetTokenT<P2GTCandidateCollection> token2_;
@@ -72,22 +72,22 @@ L1GTQuadObjectCond::L1GTQuadObjectCond(const edm::ParameterSet& config)
       collection4Cuts_(config.getParameter<edm::ParameterSet>("collection4"), config, scales_),
       enable_sanity_checks_(config.getUntrackedParameter<bool>("sanity_checks")),
       inv_mass_checks_(config.getUntrackedParameter<bool>("inv_mass_checks")),
-      delta12Cuts_(
-          config.getParameter<edm::ParameterSet>("delta12"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
-      delta13Cuts_(
-          config.getParameter<edm::ParameterSet>("delta13"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
-      delta23Cuts_(
-          config.getParameter<edm::ParameterSet>("delta23"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
-      delta14Cuts_(
-          config.getParameter<edm::ParameterSet>("delta14"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
-      delta24Cuts_(
-          config.getParameter<edm::ParameterSet>("delta24"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
-      delta34Cuts_(
-          config.getParameter<edm::ParameterSet>("delta34"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
-      delta123Cuts_(config.getParameter<edm::ParameterSet>("delta123"), config, scales_, inv_mass_checks_),
-      delta124Cuts_(config.getParameter<edm::ParameterSet>("delta124"), config, scales_, inv_mass_checks_),
-      delta134Cuts_(config.getParameter<edm::ParameterSet>("delta134"), config, scales_, inv_mass_checks_),
-      delta234Cuts_(config.getParameter<edm::ParameterSet>("delta234"), config, scales_, inv_mass_checks_),
+      correl12Cuts_(
+          config.getParameter<edm::ParameterSet>("correl12"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
+      correl13Cuts_(
+          config.getParameter<edm::ParameterSet>("correl13"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
+      correl23Cuts_(
+          config.getParameter<edm::ParameterSet>("correl23"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
+      correl14Cuts_(
+          config.getParameter<edm::ParameterSet>("correl14"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
+      correl24Cuts_(
+          config.getParameter<edm::ParameterSet>("correl24"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
+      correl34Cuts_(
+          config.getParameter<edm::ParameterSet>("correl34"), config, scales_, enable_sanity_checks_, inv_mass_checks_),
+      correl123Cuts_(config.getParameter<edm::ParameterSet>("correl123"), config, scales_, inv_mass_checks_),
+      correl124Cuts_(config.getParameter<edm::ParameterSet>("correl124"), config, scales_, inv_mass_checks_),
+      correl134Cuts_(config.getParameter<edm::ParameterSet>("correl134"), config, scales_, inv_mass_checks_),
+      correl234Cuts_(config.getParameter<edm::ParameterSet>("correl234"), config, scales_, inv_mass_checks_),
       token1_(consumes<P2GTCandidateCollection>(collection1Cuts_.tag())),
       token2_(collection1Cuts_.tag() == collection2Cuts_.tag()
                   ? token1_
@@ -153,47 +153,47 @@ void L1GTQuadObjectCond::fillDescriptions(edm::ConfigurationDescriptions& descri
   desc.addUntracked<bool>("sanity_checks", false);
   desc.addUntracked<bool>("inv_mass_checks", false);
 
-  edm::ParameterSetDescription delta12Desc;
-  L1GTDeltaCut::fillPSetDescription(delta12Desc);
-  desc.add<edm::ParameterSetDescription>("delta12", delta12Desc);
+  edm::ParameterSetDescription correl12Desc;
+  L1GTCorrelationalCut::fillPSetDescription(correl12Desc);
+  desc.add<edm::ParameterSetDescription>("correl12", correl12Desc);
 
-  edm::ParameterSetDescription delta13Desc;
-  L1GTDeltaCut::fillPSetDescription(delta13Desc);
-  desc.add<edm::ParameterSetDescription>("delta13", delta13Desc);
+  edm::ParameterSetDescription correl13Desc;
+  L1GTCorrelationalCut::fillPSetDescription(correl13Desc);
+  desc.add<edm::ParameterSetDescription>("correl13", correl13Desc);
 
-  edm::ParameterSetDescription delta23Desc;
-  L1GTDeltaCut::fillPSetDescription(delta23Desc);
-  desc.add<edm::ParameterSetDescription>("delta23", delta23Desc);
+  edm::ParameterSetDescription correl23Desc;
+  L1GTCorrelationalCut::fillPSetDescription(correl23Desc);
+  desc.add<edm::ParameterSetDescription>("correl23", correl23Desc);
 
-  edm::ParameterSetDescription delta14Desc;
-  L1GTDeltaCut::fillPSetDescription(delta14Desc);
-  desc.add<edm::ParameterSetDescription>("delta14", delta14Desc);
+  edm::ParameterSetDescription correl14Desc;
+  L1GTCorrelationalCut::fillPSetDescription(correl14Desc);
+  desc.add<edm::ParameterSetDescription>("correl14", correl14Desc);
 
-  edm::ParameterSetDescription delta24Desc;
-  L1GTDeltaCut::fillPSetDescription(delta24Desc);
-  desc.add<edm::ParameterSetDescription>("delta24", delta24Desc);
+  edm::ParameterSetDescription correl24Desc;
+  L1GTCorrelationalCut::fillPSetDescription(correl24Desc);
+  desc.add<edm::ParameterSetDescription>("correl24", correl24Desc);
 
-  edm::ParameterSetDescription delta34Desc;
-  L1GTDeltaCut::fillPSetDescription(delta34Desc);
-  desc.add<edm::ParameterSetDescription>("delta34", delta34Desc);
+  edm::ParameterSetDescription correl34Desc;
+  L1GTCorrelationalCut::fillPSetDescription(correl34Desc);
+  desc.add<edm::ParameterSetDescription>("correl34", correl34Desc);
 
-  edm::ParameterSetDescription delta123Desc;
-  L1GTMultiBodyCut::fillPSetDescription(delta123Desc);
-  desc.add<edm::ParameterSetDescription>("delta123", delta123Desc);
+  edm::ParameterSetDescription correl123Desc;
+  L1GT3BodyCut::fillPSetDescription(correl123Desc);
+  desc.add<edm::ParameterSetDescription>("correl123", correl123Desc);
 
-  edm::ParameterSetDescription delta124Desc;
-  L1GTMultiBodyCut::fillPSetDescription(delta124Desc);
-  desc.add<edm::ParameterSetDescription>("delta124", delta124Desc);
+  edm::ParameterSetDescription correl124Desc;
+  L1GT3BodyCut::fillPSetDescription(correl124Desc);
+  desc.add<edm::ParameterSetDescription>("correl124", correl124Desc);
 
-  edm::ParameterSetDescription delta134Desc;
-  L1GTMultiBodyCut::fillPSetDescription(delta134Desc);
-  desc.add<edm::ParameterSetDescription>("delta134", delta134Desc);
+  edm::ParameterSetDescription correl134Desc;
+  L1GT3BodyCut::fillPSetDescription(correl134Desc);
+  desc.add<edm::ParameterSetDescription>("correl134", correl134Desc);
 
-  edm::ParameterSetDescription delta234Desc;
-  L1GTMultiBodyCut::fillPSetDescription(delta234Desc);
-  desc.add<edm::ParameterSetDescription>("delta234", delta234Desc);
+  edm::ParameterSetDescription correl234Desc;
+  L1GT3BodyCut::fillPSetDescription(correl234Desc);
+  desc.add<edm::ParameterSetDescription>("correl234", correl234Desc);
 
-  L1GTDeltaCut::fillLUTDescriptions(desc);
+  L1GTCorrelationalCut::fillLUTDescriptions(desc);
 
   descriptions.addWithDefaultLabel(desc);
 }
@@ -252,16 +252,16 @@ bool L1GTQuadObjectCond::filter(edm::StreamID, edm::Event& event, const edm::Eve
           pass &= collection3Cuts_.checkPrimaryVertices(col3->at(idx3), *primVertCol);
           pass &= collection4Cuts_.checkObject(col4->at(idx4));
           pass &= collection4Cuts_.checkPrimaryVertices(col4->at(idx4), *primVertCol);
-          pass &= delta12Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), massErrors);
-          pass &= delta13Cuts_.checkObjects(col1->at(idx1), col3->at(idx3), massErrors);
-          pass &= delta23Cuts_.checkObjects(col2->at(idx2), col3->at(idx3), massErrors);
-          pass &= delta14Cuts_.checkObjects(col1->at(idx1), col4->at(idx4), massErrors);
-          pass &= delta24Cuts_.checkObjects(col2->at(idx2), col4->at(idx4), massErrors);
-          pass &= delta34Cuts_.checkObjects(col3->at(idx3), col4->at(idx4), massErrors);
-          pass &= delta123Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), col3->at(idx3), massErrors);
-          pass &= delta124Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), col4->at(idx4), massErrors);
-          pass &= delta134Cuts_.checkObjects(col1->at(idx1), col3->at(idx3), col4->at(idx4), massErrors);
-          pass &= delta234Cuts_.checkObjects(col2->at(idx2), col3->at(idx3), col4->at(idx4), massErrors);
+          pass &= correl12Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), massErrors);
+          pass &= correl13Cuts_.checkObjects(col1->at(idx1), col3->at(idx3), massErrors);
+          pass &= correl23Cuts_.checkObjects(col2->at(idx2), col3->at(idx3), massErrors);
+          pass &= correl14Cuts_.checkObjects(col1->at(idx1), col4->at(idx4), massErrors);
+          pass &= correl24Cuts_.checkObjects(col2->at(idx2), col4->at(idx4), massErrors);
+          pass &= correl34Cuts_.checkObjects(col3->at(idx3), col4->at(idx4), massErrors);
+          pass &= correl123Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), col3->at(idx3), massErrors);
+          pass &= correl124Cuts_.checkObjects(col1->at(idx1), col2->at(idx2), col4->at(idx4), massErrors);
+          pass &= correl134Cuts_.checkObjects(col1->at(idx1), col3->at(idx3), col4->at(idx4), massErrors);
+          pass &= correl234Cuts_.checkObjects(col2->at(idx2), col3->at(idx3), col4->at(idx4), massErrors);
 
           condition_result |= pass;
 

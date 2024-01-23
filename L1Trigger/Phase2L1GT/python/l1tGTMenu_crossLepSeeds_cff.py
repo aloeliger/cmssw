@@ -105,10 +105,10 @@ TkMuonDoubleTkEle61717 = l1tGTTripleObjectCond.clone(
         regionsMinPt=cms.vdouble(13,13), 
         regionsQualityFlags=cms.vuint32(0b0010,0b0000),
     ),
-    delta12 = cms.PSet(
+    correl12 = cms.PSet(
         maxDz = cms.double(1)
     ),
-    delta13 = cms.PSet(
+    correl13 = cms.PSet(
         maxDz = cms.double(1)
     ),
 )
@@ -140,10 +140,10 @@ DoubleTkMuonTkEle559 = l1tGTTripleObjectCond.clone(
         regionsMinPt=cms.vdouble(7,6), 
         regionsQualityFlags=cms.vuint32(0b0010,0b0000),
     ),
-    delta12 = cms.PSet(
+    correl12 = cms.PSet(
         maxDz = cms.double(1)
     ),
-    delta13 = cms.PSet(
+    correl13 = cms.PSet(
         maxDz = cms.double(1)
     ),
 )

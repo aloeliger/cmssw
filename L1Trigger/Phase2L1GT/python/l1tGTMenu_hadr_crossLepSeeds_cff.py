@@ -66,10 +66,10 @@ TkMuTriPuppiJetdRMaxDoubleJetdEtaMax = l1tGTQuadObjectCond.clone( #needs z0 betw
         regionsAbsEtaLowerBounds=cms.vdouble(0,1.5),
         regionsMinPt=cms.vdouble(25,25), #safety cut, actually 15 and 16
     ),
-    delta12 = cms.PSet(
+    correl12 = cms.PSet(
         maxDR = cms.double(0.4),
     ),
-    delta34 = cms.PSet(
+    correl34 = cms.PSet(
         maxDEta = cms.double(1.6)
     ),
 

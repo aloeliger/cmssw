@@ -106,12 +106,12 @@ TripleTkMuon530OSMassMax9 = l1tGTTripleObjectCond.clone(
         maxEta = cms.double(2.4),
         minQualityScore = cms.uint32(0)
     ),
-    delta12 = cms.PSet(
+    correl12 = cms.PSet(
         maxDz = cms.double(1),
         os = cms.bool(True),
         maxInvMass = cms.double(9),
     ),
-    delta13 = cms.PSet(
+    correl13 = cms.PSet(
         maxDz = cms.double(1)
     ),
 )
@@ -140,10 +140,10 @@ TripleTkMuon53p52p5OSMass5to17 = l1tGTTripleObjectCond.clone(
         maxEta = cms.double(2.4),
         minQualityScore = cms.uint32(0)
     ),
-    delta12 = cms.PSet(
+    correl12 = cms.PSet(
         maxDz = cms.double(1),
     ),
-    delta13 = cms.PSet(
+    correl13 = cms.PSet(
         maxDz = cms.double(1),
         os = cms.bool(True),
         minInvMass = cms.double(5),

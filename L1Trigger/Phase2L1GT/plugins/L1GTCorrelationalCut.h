@@ -1,5 +1,5 @@
-#ifndef L1Trigger_Phase2L1GT_L1GTDeltaCut_h
-#define L1Trigger_Phase2L1GT_L1GTDeltaCut_h
+#ifndef L1Trigger_Phase2L1GT_L1GTCorrelationalCut_h
+#define L1Trigger_Phase2L1GT_L1GTCorrelationalCut_h
 
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -17,13 +17,13 @@
 
 namespace l1t {
 
-  class L1GTDeltaCut {
+  class L1GTCorrelationalCut {
   public:
-    L1GTDeltaCut(const edm::ParameterSet& config,
-                 const edm::ParameterSet& lutConfig,
-                 const L1GTScales& scales,
-                 bool enable_sanity_checks = false,
-                 bool inv_mass_checks = false)
+    L1GTCorrelationalCut(const edm::ParameterSet& config,
+                         const edm::ParameterSet& lutConfig,
+                         const L1GTScales& scales,
+                         bool enable_sanity_checks = false,
+                         bool inv_mass_checks = false)
         : scales_(scales),
           coshEtaLUT_(lutConfig.getParameterSet("cosh_eta_lut")),
           coshEtaLUT2_(lutConfig.getParameterSet("cosh_eta_lut2")),
@@ -316,4 +316,4 @@ namespace l1t {
 
 }  // namespace l1t
 
-#endif  // L1Trigger_Phase2L1GT_L1GTDeltaCut_h
+#endif  // L1Trigger_Phase2L1GT_L1GTCorrelationalCut_h

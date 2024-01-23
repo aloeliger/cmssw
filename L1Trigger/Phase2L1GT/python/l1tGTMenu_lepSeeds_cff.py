@@ -74,10 +74,10 @@ TripleTkMuon533 = l1tGTTripleObjectCond.clone(
         maxEta = cms.double(2.4),
         minQualityScore = cms.uint32(0)
     ),
-    delta12 = cms.PSet(
+    correl12 = cms.PSet(
         maxDz = cms.double(1)
     ),
-    delta13 = cms.PSet(
+    correl13 = cms.PSet(
         maxDz = cms.double(1)
     ),
 )

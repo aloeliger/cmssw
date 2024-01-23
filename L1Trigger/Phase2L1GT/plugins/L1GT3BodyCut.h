@@ -1,5 +1,5 @@
-#ifndef L1Trigger_Phase2L1GT_L1GTMultiBodyCut_h
-#define L1Trigger_Phase2L1GT_L1GTMultiBodyCut_h
+#ifndef L1Trigger_Phase2L1GT_L1GT3BodyCut_h
+#define L1Trigger_Phase2L1GT_L1GT3BodyCut_h
 
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -17,12 +17,12 @@
 
 namespace l1t {
 
-  class L1GTMultiBodyCut {
+  class L1GT3BodyCut {
   public:
-    L1GTMultiBodyCut(const edm::ParameterSet& config,
-                     const edm::ParameterSet& lutConfig,
-                     const L1GTScales& scales,
-                     bool inv_mass_checks = false)
+    L1GT3BodyCut(const edm::ParameterSet& config,
+                 const edm::ParameterSet& lutConfig,
+                 const L1GTScales& scales,
+                 bool inv_mass_checks = false)
         : scales_(scales),
           coshEtaLUT_(lutConfig.getParameterSet("cosh_eta_lut")),
           coshEtaLUT2_(lutConfig.getParameterSet("cosh_eta_lut2")),
@@ -189,4 +189,4 @@ namespace l1t {
 
 }  // namespace l1t
 
-#endif  // L1Trigger_Phase2L1GT_L1GTMultiBodyCut_h
+#endif  // L1Trigger_Phase2L1GT_L1GT3BodyCut_h

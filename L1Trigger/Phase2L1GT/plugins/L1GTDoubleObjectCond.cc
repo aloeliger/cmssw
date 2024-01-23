@@ -16,7 +16,7 @@
 
 #include "L1GTOptionalParam.h"
 #include "L1GTSingleCollectionCut.h"
-#include "L1GTDeltaCut.h"
+#include "L1GTCorrelationalCut.h"
 #include "L1GTSingleInOutLUT.h"
 
 #include <cinttypes>
@@ -46,7 +46,7 @@ private:
   const bool enable_sanity_checks_;
   const bool inv_mass_checks_;
 
-  const L1GTDeltaCut deltaCuts_;
+  const L1GTCorrelationalCut deltaCuts_;
 
   const edm::EDGetTokenT<P2GTCandidateCollection> token1_;
   const edm::EDGetTokenT<P2GTCandidateCollection> token2_;
@@ -92,8 +92,8 @@ void L1GTDoubleObjectCond::fillDescriptions(edm::ConfigurationDescriptions& desc
   desc.addUntracked<bool>("sanity_checks", false);
   desc.addUntracked<bool>("inv_mass_checks", false);
 
-  L1GTDeltaCut::fillPSetDescription(desc);
-  L1GTDeltaCut::fillLUTDescriptions(desc);
+  L1GTCorrelationalCut::fillPSetDescription(desc);
+  L1GTCorrelationalCut::fillLUTDescriptions(desc);
 
   edm::ParameterSetDescription scalesDesc;
   L1GTScales::fillPSetDescription(scalesDesc);

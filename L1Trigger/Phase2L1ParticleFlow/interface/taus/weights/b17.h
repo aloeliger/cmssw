@@ -6,6 +6,7 @@
 #ifndef B17_H_
 #define B17_H_
 
-bias17_t b17[1] = {-0.714844};
-
+namespace puppiTaus{
+  bias17_t b17[1] = {-0.714844};
+}
 #endif

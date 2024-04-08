@@ -13,6 +13,8 @@
 typedef ap_ufixed<14, 12, AP_TRN, AP_SAT> pt_t;
 typedef ap_fixed<10, 4> etaphi_t;
 
+using namespace puppiTaus;
+
 // Tau NN returns two values
 struct Tau_NN_Result {
   result_t nn_pt_correction;

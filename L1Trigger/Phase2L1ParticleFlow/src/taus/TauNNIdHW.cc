@@ -1,6 +1,8 @@
 #include <iostream>
 #include "L1Trigger/Phase2L1ParticleFlow/interface/taus/TauNNIdHW.h"
 
+using namespace puppiTaus;
+
 TauNNIdHW::TauNNIdHW() { NNvectorVar_.clear(); }
 TauNNIdHW::~TauNNIdHW() {}
 

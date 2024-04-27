@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-L1TCaloSummaryCICADAv1p1p2 = cms.EDProducer('L1TCaloSummary_CICADA_vXp1p2',
+L1TCaloSummaryCICADAv1p1p0 = cms.EDProducer('L1TCaloSummary_CICADA_v1p1p0',
     nPumBins = cms.uint32(18),
     pumLUT00n=  cms.vdouble(0.43, 0.32, 0.29, 0.36, 0.33, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25),
     pumLUT00p=  cms.vdouble(0.45, 0.32, 0.29, 0.35, 0.31, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25),
@@ -50,7 +50,7 @@ L1TCaloSummaryCICADAv1p1p2 = cms.EDProducer('L1TCaloSummary_CICADA_vXp1p2',
     firmwareVersion = cms.int32(1),
     #CICADAModelVersion = cms.string("CICADAModel_v1")
     # CICADAModelVersion = cms.string("CICADA/CICADAModel_v1p1"),
-    CICADAModelVersion = cms.string("CICADA/CICADAModel_v1p1p2"),
+    CICADAModelVersion = cms.string("CICADA/CICADAModel_v1p1"),
     useTestPatterns = cms.bool(False),
     testPatterns = cms.VPSet(
         # Test Pattern 1: Vivado_HLS result: 11.2344

@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-L1TCaloSummaryCICADAv2p1p2 = cms.EDProducer('L1TCaloSummaryCICADAvUniversal',
+L1TCaloSummaryCICADAv2p1p2 = cms.EDProducer('L1TCaloSummary_CICADA_vXp1p2',
                                         nPumBins = cms.uint32(18),
                                         pumLUT00n=  cms.vdouble(0.43, 0.32, 0.29, 0.36, 0.33, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25),
                                         pumLUT00p=  cms.vdouble(0.45, 0.32, 0.29, 0.35, 0.31, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25),

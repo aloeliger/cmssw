@@ -9,6 +9,8 @@ simCaloStage2Layer1Digis = cms.EDProducer(
     'L1TCaloLayer1',
     ecalToken = cms.InputTag("simEcalTriggerPrimitiveDigis"),
     hcalToken = cms.InputTag("simHcalTriggerPrimitiveDigis"),
+    #ecalToken = cms.InputTag("ecalDigis"),
+    #hcalToken = cms.InputTag("hcalDigis"),
     useLSB = cms.bool(True),
     useCalib = cms.bool(True),
     useECALLUT = cms.bool(True),

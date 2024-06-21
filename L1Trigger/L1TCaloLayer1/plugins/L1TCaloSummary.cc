@@ -141,7 +141,8 @@ L1TCaloSummary<INPUT, OUTPUT>::L1TCaloSummary(const edm::ParameterSet& iConfig)
       boostedJetPtFactor(iConfig.getParameter<double>("boostedJetPtFactor")),
       verbose(iConfig.getParameter<bool>("verbose")),
       fwVersion(iConfig.getParameter<int>("firmwareVersion")),
-      regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis"))),
+      //regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis"))),
+      regionToken(consumes<L1CaloRegionCollection>(iConfig.getParameter<edm::InputTag>("regionToken"))),
       loader(hls4mlEmulator::ModelLoader(iConfig.getParameter<string>("CICADAModelVersion"))),
       overwriteWithTestPatterns(iConfig.getParameter<bool>("useTestPatterns")),
       testPatterns(iConfig.getParameter<std::vector<edm::ParameterSet>>("testPatterns")) {
@@ -221,6 +222,8 @@ void L1TCaloSummary<INPUT, OUTPUT>::produce(edm::Event& iEvent, const edm::Event
     //iEta taken from this ranges from 4-17, (I assume reserving lower and higher for forward regions)
     //So our first index, index 0, is technically iEta=4, and so-on.
     //CICADA reads this as a flat vector
+    //std::cout<<"iPhi: "<<i.gctPhi()<<" iEta: "<<(i.gctEta() - 4)<<" iEt: "<<i.et()<<std::endl;
+    //std::cout<<"iPhi: "<<i.gctPhi()<<" iEta: "<<i.gctEta() <<" iEt: "<<i.et()<<std::endl;
     modelInput[14 * i.gctPhi() + (i.gctEta() - 4)] = i.et();
   }
   // Check if we're using test patterns. If so, we overwrite the inputs with a test pattern
@@ -255,6 +258,7 @@ void L1TCaloSummary<INPUT, OUTPUT>::produce(edm::Event& iEvent, const edm::Event
   model->prepare_input(modelInput);
   model->predict();
   model->read_result(modelResult);
+  //std::cout<<"CICADA: "<<modelResult[0].to_float()<<std::endl;
 
   CICADAScore->push_back(0, modelResult[0].to_float());
 

@@ -9,6 +9,8 @@ from L1Trigger.L1TNtuples.l1UpgradeTree_cfi import *
 from L1Trigger.L1TNtuples.l1uGTTree_cfi import *
 from L1Trigger.L1TNtuples.l1uGTTestcrateTree_cfi import *
 from L1Trigger.L1TNtuples.l1HOTree_cfi import *
+from L1Trigger.L1TNtuples.l1CaloLayer1Tree_cfi import l1CaloLayer1Tree
+from L1Trigger.L1TNtuples.l1CaloSummaryTree_cfi import l1CaloSummaryTree
 
 # we don't have omtfDigis yet, use unpacked input payloads of GMT
 l1UpgradeTfMuonTree.omtfMuonToken = cms.untracked.InputTag("gmtStage2Digis","OMTF")
@@ -27,6 +29,8 @@ L1NtupleRAW = cms.Sequence(
   +l1uGTTree
   +l1uGTTestcrateTree
   +l1HOTree
+  +l1CaloLayer1Tree
+  +l1CaloSummaryTree
 )
 
 #  do not have l1t::CaloTowerBxCollection in Stage1

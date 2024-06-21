@@ -15,7 +15,7 @@ namespace L1Analysis {
     void Init() {}
 
     float CICADAScore;
-    unsigned short int modelInput[18][14];  //Stored in indices of [iPhi][iEta]
+    int modelInput[18][14];  //Stored in indices of [iPhi][iEta]
   };
 }  // namespace L1Analysis
 

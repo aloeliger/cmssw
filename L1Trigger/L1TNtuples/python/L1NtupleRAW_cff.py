@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 from L1Trigger.L1TNtuples.l1EventTree_cfi import *
 from L1Trigger.L1TNtuples.l1ExtraTree_cfi import *
 from L1Trigger.L1TNtuples.l1CaloTowerTree_cfi import *
+from L1Trigger.L1TNtuples.l1CaloSummaryTree_cfi import l1CaloSummaryEmuTree
 from L1Trigger.L1TNtuples.l1UpgradeTfMuonTree_cfi import *
 from L1Trigger.L1TNtuples.l1UpgradeTfMuonShowerTree_cfi import *
 from L1Trigger.L1TNtuples.l1UpgradeTree_cfi import *
@@ -17,10 +18,16 @@ l1UpgradeTfMuonTree.emtfMuonToken = cms.untracked.InputTag("gmtStage2Digis","EMT
 # We have only output of the ZDC emulator available, no info from unpacker
 l1UpgradeTree.sumZDCToken = cms.untracked.InputTag("etSumZdcProducer")
 
+l1CaloSummaryTree = l1CaloSummaryEmuTree.clone(
+    scoreToken = cms.untracked.InputTag("caloLayer1Digis", "CICADAScore"),
+    regionToken = cms.untracked.InputTag("caloLayer1Digis"),
+)
+
 L1NtupleRAW = cms.Sequence(
   l1EventTree
   #+l1ExtraTree
   +l1CaloTowerTree
+  +l1CaloSummaryTree
   +l1UpgradeTfMuonTree
   +l1UpgradeTfMuonShowerTree
   +l1UpgradeTree

@@ -26,8 +26,6 @@ l1CaloTowerEmuTree.hcalToken = cms.untracked.InputTag("simHcalTriggerPrimitiveDi
 l1CaloTowerEmuTree.l1TowerToken = cms.untracked.InputTag("simCaloStage2Layer1Digis")
 l1CaloTowerEmuTree.l1ClusterToken = cms.untracked.InputTag("simCaloStage2Digis", "MP")
 
-l1CaloSummaryEmuTree = l1CaloSummaryTree.clone()
-
 l1UpgradeEmuTree = l1UpgradeTree.clone(
     egToken = "simCaloStage1FinalDigis",
     tauTokens = ["simCaloStage1FinalDigis:rlxTaus"],

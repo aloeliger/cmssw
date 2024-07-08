@@ -11,6 +11,7 @@
 <use name="DataFormats/L1TMuon"/>
 <use name="DataFormats/L1GlobalTrigger"/>
 <use name="DataFormats/L1TCalorimeter"/>
+<use name="DataFormats/L1CaloTrigger"/>
 <use name="DataFormats/L1TGlobal"/>
 <use name="DataFormats/HcalDigi"/>
 <use name="DataFormats/EcalDigi"/>

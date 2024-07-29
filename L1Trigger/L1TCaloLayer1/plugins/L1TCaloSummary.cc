@@ -141,7 +141,9 @@ L1TCaloSummary<INPUT, OUTPUT>::L1TCaloSummary(const edm::ParameterSet& iConfig)
       boostedJetPtFactor(iConfig.getParameter<double>("boostedJetPtFactor")),
       verbose(iConfig.getParameter<bool>("verbose")),
       fwVersion(iConfig.getParameter<int>("firmwareVersion")),
-      regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis"))),
+      //regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("simCaloStage2Layer1Digis"))),
+      //regionToken(consumes<L1CaloRegionCollection>(edm::InputTag("caloLayer1Digis"))),
+      regionToken(consumes<L1CaloRegionCollection>(iConfig.getParameter<edm::InputTag>("regionToken"))),
       loader(hls4mlEmulator::ModelLoader(iConfig.getParameter<string>("CICADAModelVersion"))),
       overwriteWithTestPatterns(iConfig.getParameter<bool>("useTestPatterns")),
       testPatterns(iConfig.getParameter<std::vector<edm::ParameterSet>>("testPatterns")) {
@@ -233,6 +235,7 @@ void L1TCaloSummary<INPUT, OUTPUT>::produce(edm::Event& iEvent, const edm::Event
     std::string PhiRowString;
 
     edm::LogWarning("L1TCaloSummary") << "Overwriting existing CICADA input with test pattern!\n";
+    //std::cout<<"Overwriting existing CICADA input with test pattern!\n";
 
     for (unsigned short int iPhi = 1; iPhi <= 18; ++iPhi) {
       PhiRowString = "";
@@ -247,6 +250,7 @@ void L1TCaloSummary<INPUT, OUTPUT>::produce(edm::Event& iEvent, const edm::Event
       inputStream << "\n";
     }
     edm::LogInfo("L1TCaloSummary") << "Input Stream:\n" << inputStream.str();
+    //std::cout<<inputStream.str();
   }
 
   //Extract model output
@@ -258,8 +262,11 @@ void L1TCaloSummary<INPUT, OUTPUT>::produce(edm::Event& iEvent, const edm::Event
 
   CICADAScore->push_back(0, modelResult[0].to_float());
 
-  if (overwriteWithTestPatterns)
+  if (overwriteWithTestPatterns) {
     edm::LogInfo("L1TCaloSummary") << "Test Pattern Output: " << CICADAScore->at(0, 0);
+    //std::cout<<CICADAScore->at(0, 0);
+  }
+    
 
   summaryCard.setRegionData(inputRegions);
 
